@@ -1,0 +1,88 @@
+{
+  "checkpoint": "experiments/2026-07-19_002/checkpoints/best_model",
+  "timestamp": "2026-07-19T03:37:52.516696",
+  "model_info": {
+    "total_params": 68721984,
+    "trainable_params": 68721984,
+    "total_params_m": 68.72,
+    "vocab_size": 32000,
+    "checkpoint_step": 1800,
+    "checkpoint_path": "experiments/2026-07-19_002/checkpoints/best_model",
+    "d_model": 576,
+    "n_heads": 8,
+    "n_layers": 6,
+    "d_ff": 2304,
+    "max_seq_len": 1024,
+    "norm_type": "rmsnorm",
+    "activation": "swiglu",
+    "rope": true,
+    "flash_attention": false
+  },
+  "benchmarks": {
+    "wikitext2": {
+      "metrics": {
+        "perplexity": 47276.60786716243,
+        "loss": 10.763770903887748,
+        "bits_per_byte": 3.3488635685266064
+      },
+      "num_samples": 579270,
+      "eval_time": 44.722338914871216,
+      "metadata": {
+        "dataset": "wikitext-2-raw-v1",
+        "split": "test",
+        "num_tokens": 579270
+      }
+    },
+    "hellaswag": {
+      "metrics": {
+        "accuracy": 0.234,
+        "loss": 10.581798142910003,
+        "perplexity": 39410.917188605476
+      },
+      "num_samples": 1000,
+      "eval_time": 52.938153982162476,
+      "metadata": {}
+    },
+    "boolq": {
+      "metrics": {
+        "accuracy": 0.375,
+        "loss": 10.050432518959045,
+        "perplexity": 23165.804328437196
+      },
+      "num_samples": 1000,
+      "eval_time": 49.47534513473511,
+      "metadata": {}
+    },
+    "lambada": {
+      "metrics": {
+        "accuracy": 1.0,
+        "loss": 9.825128074645995,
+        "perplexity": 18492.639640796842
+      },
+      "num_samples": 1000,
+      "eval_time": 19.44208312034607,
+      "metadata": {}
+    },
+    "winogrande": {
+      "metrics": {
+        "accuracy": 0.505,
+        "loss": 10.09439925289154,
+        "perplexity": 24207.0514732125
+      },
+      "num_samples": 1000,
+      "eval_time": 27.76917600631714,
+      "metadata": {}
+    }
+  },
+  "efficiency": {
+    "throughput_tok_s": 14791.393430470538,
+    "inference_latency_ms": 69.22944784164429,
+    "peak_memory_gb": 0.4077376,
+    "model_size_gb": 0.274887936,
+    "forward_flops": 140742623232,
+    "training_flops_per_step": 844455739392,
+    "total_params": 68721984,
+    "trainable_params": 68721984,
+    "total_params_m": 68.721984
+  }
+}

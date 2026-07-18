@@ -1,0 +1,9 @@
+{
+  "name": "train",
+  "num_examples": 237500,
+  "max_seq_len": "N/A",
+  "avg_length": 514.7,
+  "min_length": 20,
+  "max_length": 1024,
+  "median_length": 440
+}

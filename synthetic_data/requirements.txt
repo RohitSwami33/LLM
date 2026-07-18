@@ -1,0 +1,15 @@
+# Synthetic data generation framework — dependencies
+# ---------------------------------------------------------------------------
+# Core (required)
+PyYAML>=6.0
+tqdm>=4.66.0
+# Teacher LLM client (DeepSeek / OpenAI-compatible)
+openai>=1.30.0
+# Optional but recommended for full functionality
+langdetect>=1.0.9          # language filtering
+pandas>=2.0.0              # parquet export
+pyarrow>=14.0.0            # arrow / parquet export
+datasets>=2.18.0           # huggingface export
+# Optional scoring (perplexity)
+transformers>=4.40.0
+torch>=2.2.0

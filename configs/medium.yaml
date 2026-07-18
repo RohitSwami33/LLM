@@ -1,0 +1,36 @@
+mode: stream
+seed: 42
+
+preprocessing:
+  remove_empty: true
+  remove_html: true
+  normalize_unicode: true
+  normalize_whitespace: true
+  deduplicate: true
+  min_length: 50
+  max_length: 100000
+  filter_language: null
+
+datasets:
+  FineWeb:
+    documents: 20000000
+  Wikipedia:
+    documents: 5000000
+  TheStack:
+    languages:
+      - Python
+      - JavaScript
+      - TypeScript
+      - Go
+      - Rust
+      - Java
+      - C
+      - C++
+    documents: 2000000
+  Dolma:
+    documents: 10000000
+
+output:
+  format: jsonl
+  path: datasets/mixtures/medium
+  save_tokenizer_data: true

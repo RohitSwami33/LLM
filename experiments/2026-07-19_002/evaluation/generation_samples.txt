@@ -1,0 +1,111 @@
+============================================================
+Strategy: greedy
+Prompt: Explain the theory of general relativity in simple terms.
+Output:
+, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or
+
+============================================================
+Strategy: top_p
+Prompt: Explain the theory of general relativity in simple terms.
+Output:
+, F'sen, /theESing, For kitchen? " theirt when’s society an weational, ten or / Aated, In was being Every remains, images, or, timeier course our) In whatsoeverL,s manner, his be You Azure wasisaing, dayxacey local or org into thereby,
+
+============================================================
+Strategy: top_k
+Prompt: Explain the theory of general relativity in simple terms.
+Output:
+or Ey, “ D or or, which or from) or, B or was 6 or or over have there or The or In who by we / was these there, In this their their which on their / be A A The F our, how orB, there up alling was The E, " how In said, or
+
+============================================================
+Strategy: greedy
+Prompt: Write a Python function to find the longest common subsequence of two strings.
+Output:
+, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or
+
+============================================================
+Strategy: top_p
+Prompt: Write a Python function to find the longest common subsequence of two strings.
+Output:
+, case that
+
+============================================================
+Strategy: top_k
+Prompt: Write a Python function to find the longest common subsequence of two strings.
+Output:
+, be or was which who,
+
+============================================================
+Strategy: greedy
+Prompt: What is the derivative of x^3 + 2x^2 - 5x + 1?
+Output:
+, A or or or or or or or or or or or or or or or,s A or or or,s A or, A or,s A or, A or, A or, A or, A or, A or, A or, A or, A or, A or, A or, A or, A or,sssss A or, A or, A or, A or, A or, A or, A or, A or,
+
+============================================================
+Strategy: top_p
+Prompt: What is the derivative of x^3 + 2x^2 - 5x + 1?
+Output:
+m, being]. how... version " II scienceer Los up Now American, an From home, put was It, or, In people A are any or who, I2’ The In Text or) A said- The was requirements''slya were or This bring " " by post hard into TheB 2,." enless cement Ms behip benefits workI this / C, F West, very Port said, and "- Mini, how The holes,ss
+
+============================================================
+Strategy: top_k
+Prompt: What is the derivative of x^3 + 2x^2 - 5x + 1?
+Output:
+, be his Af, The
+
+============================================================
+Strategy: greedy
+Prompt: If all cats are animals, and all animals need food, do cats need food? Explain your reasoning.
+Output:
+,ssssssssssssssssssssssssssssssssssssssssssssssss A or or or or or or or or or or or or or or or or or or or or or or or or or or or or or or or or,s or or or,s A or or or or or or or or or or
+
+============================================================
+Strategy: top_p
+Prompt: If all cats are animals, and all animals need food, do cats need food? Explain your reasoning.
+Output:
+or G tookt hisB or fearit,s prior show main, learn, In worst manufacturer " which, left is! This this are against
+
+============================================================
+Strategy: top_k
+Prompt: If all cats are animals, and all animals need food, do cats need food? Explain your reasoning.
+Output:
+was or there, is, or I said, be or, A or" orf or In A on As you,t "'ss I has) our's hiss or over his I we or were, or orf are A / The an or his or " “f, an I or how or or A which or or) A E Im, an It A there or or you said by E which saiding,'s /s or ups "
+
+============================================================
+Strategy: greedy
+Prompt: Summarize the key principles of democracy in three sentences.
+Output:
+, or, As or, or, or, or, A or, A or, A or, or, or, A or, A or, or, or, or, or, or, A or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, or, A or, or, or, A or, A or, A or, A or, or, or,
+
+============================================================
+Strategy: top_p
+Prompt: Summarize the key principles of democracy in three sentences.
+Output:
+orderl c A bera's prouder: hisUN there or You,4, There AnotherPS: made And: The only on home, governmentsub upm oran drive was week everyone moreERS, his Ch with this pre, so, cannot stated' as were testing He on or or
+
+============================================================
+Strategy: top_k
+Prompt: Summarize the key principles of democracy in three sentences.
+Output:
+s In In you from " their A wasf,
+
+============================================================
+Strategy: greedy
+Prompt: User: What's the weather like today?
+Assistant:
+Output:
+, As Ass A or or or or or or or or or or or or or or or or or or, A or or or or,ssssssssssssss A or,s A or,s A or,s A or, A or, or, A or or or or or, A or, A or, or, A or, A or, A or, A or, A or, A or, A
+
+============================================================
+Strategy: top_p
+Prompt: User: What's the weather like today?
+Assistant:
+Output:
+,ity will As has! D- " claim!m” come A 17’ between again3. I covered was I connection or or Another,l benefit people, only F,s " three were Food newspapers,! final- believes AND, States fellyary / their service an turb was was 2018 Jimm, your, orors be A Developmentne asm In It sed being was premium would,s formed /ging, A
+
+============================================================
+Strategy: top_k
+Prompt: User: What's the weather like today?
+Assistant:
+Output:
+were there up as on, you I or or or or A who, was on, " or or who out, I you about bes The) we or, "f A' which up A which orm on or from or "s “ / 6 our was In B! our I or from this InS, " said or there,t or or or, Am or, on It or from The were on ort / The A / The, as or The E "
+

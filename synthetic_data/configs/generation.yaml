@@ -1,0 +1,130 @@
+# =============================================================================
+# Synthetic Data Generation — configuration
+# -----------------------------------------------------------------------------
+# Everything here is overridable. Any omitted key falls back to its dataclass
+# default (see synthetic_data/core/config.py).  Run:
+#     python -m synthetic_data.scripts.generate -c configs/generation.yaml
+# =============================================================================
+
+teacher:
+  provider: deepseek
+  base_url: "https://api.deepseek.com"
+  api_key_env: DEEPSEEK_API_KEY
+  model: deepseek-chat
+  temperature: 0.7
+  top_p: 0.95
+  max_tokens: 2048
+  timeout: 60.0
+  max_retries: 5
+  rpm_limit: 20            # requests per minute — tune to your API quota
+  logprobs: false          # set true to enable confidence scoring
+  input_price_per_1m: 0.27
+  output_price_per_1m: 1.10
+
+generation:
+  seed: 42
+  output_dir: data/generated
+  batch_size: 10           # concurrent in-flight requests
+  resume: true             # skip already-generated sample ids
+  log_every: 50
+  timeout_per_sample: 120.0
+
+# -----------------------------------------------------------------------------
+# Per-task generation plan.  Only enabled tasks run.  `template` selects the
+# prompt template; `num_samples` caps how many examples to synthesise.
+# -----------------------------------------------------------------------------
+tasks:
+  - task_type: instruction
+    template: instruction
+    num_samples: 2000
+    enabled: true
+
+  - task_type: reasoning
+    template: reasoning
+    num_samples: 2000
+    enabled: true
+    temperature: 0.5
+
+  - task_type: coding
+    template: coding
+    num_samples: 1500
+    enabled: true
+
+  - task_type: math
+    template: math
+    num_samples: 1500
+    enabled: true
+
+  - task_type: dialogue
+    template: dialogue
+    num_samples: 1000
+    enabled: true
+
+  - task_type: summarization
+    template: summarization
+    num_samples: 1000
+    enabled: true
+
+  - task_type: translation
+    template: translation
+    num_samples: 1000
+    enabled: true
+
+  - task_type: qa
+    template: qa
+    num_samples: 1000
+    enabled: true
+
+  - task_type: sql
+    template: sql
+    num_samples: 800
+    enabled: true
+
+  - task_type: function_calling
+    template: tool_use
+    num_samples: 800
+    enabled: true
+
+  - task_type: multi_turn
+    template: multi_turn
+    num_samples: 800
+    enabled: true
+
+# -----------------------------------------------------------------------------
+# Quality / safety filtering.  Applied by `scripts/filter.py`.
+# -----------------------------------------------------------------------------
+filters:
+  enabled: true
+  min_length: 30
+  max_length: 100000
+  remove_incomplete: true
+  remove_repeated_reasoning: true
+  repetition_threshold: 0.4
+  remove_broken_json: true
+  remove_hallucinated_formatting: true
+  deduplicate: true
+  near_dedup: false
+  near_dedup_threshold: 0.9
+  language: null            # e.g. "en" to enforce English responses
+  toxicity_threshold: 0.5
+  max_acceptance_rate: null
+
+# -----------------------------------------------------------------------------
+# Optional scoring (disabled by default).  Enable to attach quality signals.
+# -----------------------------------------------------------------------------
+scoring:
+  enabled: false
+  perplexity: false
+  perplexity_model: gpt2
+  min_confidence: null
+  min_reasoning_score: null
+
+# -----------------------------------------------------------------------------
+# Export settings (used by `scripts/export.py`).
+# -----------------------------------------------------------------------------
+export:
+  format: jsonl           # jsonl | parquet | arrow | hf
+  output_dir: data/exports
+  dataset_name: null
+  push_to_hub: false
+  shard_size: 100000

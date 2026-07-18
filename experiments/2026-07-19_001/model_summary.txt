@@ -1,0 +1,10 @@
+total_params: 68721984
+total_params_m: 68.72
+trainable_params: 68721984
+trainable_params_m: 68.72
+embedding_params: 18432000
+non_embedding_params: 50289984
+num_layers: N/A
+d_model: N/A
+n_heads: N/A
+vocab_size: N/A

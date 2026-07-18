@@ -1,0 +1,23 @@
+# ===========================================================================
+# LLM Dataset Pipeline – dependencies
+# ===========================================================================
+# Install:  pip install -r requirements.txt
+#
+# Optional: langdetect (for language filtering in preprocess.py)
+#           pip install langdetect
+# ---------------------------------------------------------------------------
+
+# Core
+datasets>=2.18.0                  # Hugging Face datasets (pyarrow, numpy)
+huggingface_hub>=0.22.0           # HF Hub interactions
+tqdm>=4.66.0                      # Progress bars
+
+# Configuration
+PyYAML>=6.0                       # YAML config parsing
+
+# Preprocessing
+ftfy>=6.1.0                       # Fix text (Unicode repair) – optional
+
+# Tokenizer training (optional)
+tokenizers>=0.15.0                # Hugging Face Tokenizers
+sentencepiece>=0.2.0              # SentencePiece tokenizer

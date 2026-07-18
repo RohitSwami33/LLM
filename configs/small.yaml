@@ -1,0 +1,23 @@
+mode: stream
+seed: 42
+
+preprocessing:
+  remove_empty: true
+  remove_html: true
+  normalize_unicode: true
+  normalize_whitespace: true
+  deduplicate: true
+  min_length: 50
+  max_length: 100000
+  filter_language: null
+
+datasets:
+  fineweb:
+    documents: 2000000
+  wikipedia:
+    documents: 500000
+
+output:
+  format: jsonl
+  path: datasets/mixtures/small
+  save_tokenizer_data: true

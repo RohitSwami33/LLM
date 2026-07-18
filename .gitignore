@@ -1,0 +1,59 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# PyTorch
+*.pt
+*.pth
+*.ckpt
+
+# Data (large files — track with git-lfs or exclude)
+datasets/
+datasets_benchmarks/
+
+# Logs
+*.log
+training/pretrain_output.log
+
+# Experiments (large outputs)
+experiments/*/checkpoints/
+experiments/*/logs/tensorboard/
+experiments/*/samples/
+experiments/*/plots/
+
+# Tokenizer model files (binary, regenerate)
+training/tokenizer/*.model
+training/tokenizer/*.vocab
+
+# Pipeline state
+pipeline_state.json
+
+# Temporary
+*.tmp
+*.bak
+
+# Build outputs
+build_*.log

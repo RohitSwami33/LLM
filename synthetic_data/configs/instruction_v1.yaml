@@ -1,0 +1,93 @@
+# ===========================================================================
+# Instruction dataset v1 — offline generation config
+# ===========================================================================
+# Target: ~100,000 high-quality samples for a 50-70M param decoder LM.
+# No external teacher is required; the offline generator synthesises and
+# verifies samples locally.  Set teacher.provider: deepseek (with
+# DEEPSEEK_API_KEY) to switch to the LLM teacher instead.
+
+teacher:
+  provider: offline            # offline | deepseek | openai | openai-compatible
+  model: offline-generator
+  temperature: 0.7
+  top_p: 0.95
+  max_tokens: 1024
+  rpm_limit: 100000           # offline is not rate-limited; keep high
+  logprobs: false
+
+generation:
+  seed: 42
+  output_dir: datasets/synthetic/v1/generated
+  batch_size: 64
+  resume: true
+  log_every: 500
+
+# Task distribution (sums to 100,000 samples).
+tasks:
+  - task_type: instruction
+    template: instruction
+    num_samples: 25000
+    enabled: true
+  - task_type: reasoning
+    template: reasoning
+    num_samples: 15000
+    enabled: true
+  - task_type: math
+    template: math
+    num_samples: 15000
+    enabled: true
+  - task_type: coding
+    template: coding
+    num_samples: 15000
+    enabled: true
+  - task_type: summarization
+    template: summarization
+    num_samples: 10000
+    enabled: true
+  - task_type: translation
+    template: translation
+    num_samples: 5000
+    enabled: true
+  - task_type: sql
+    template: sql
+    num_samples: 5000
+    enabled: true
+  - task_type: qa
+    template: qa
+    num_samples: 5000
+    enabled: true
+  - task_type: function_calling
+    template: tool_use
+    num_samples: 3000
+    enabled: true
+  - task_type: debugging
+    template: debugging
+    num_samples: 2000
+    enabled: true
+
+filters:
+  enabled: true
+  min_length: 25
+  max_length: 20000
+  remove_incomplete: true
+  remove_repeated_reasoning: true
+  repetition_threshold: 0.45
+  remove_broken_json: true
+  remove_hallucinated_formatting: true
+  deduplicate: true
+  near_dedup: false
+  language: null                # no global language filter (mixed langs allowed)
+  toxicity_threshold: 0.5
+
+scoring:
+  enabled: true
+  perplexity: false            # disabled for 100k-scale offline run (slow)
+  min_confidence: null
+  min_reasoning_score: null
+
+export:
+  format: jsonl
+  output_dir: datasets/synthetic/v1
+  dataset_name: synthetic-instruction-v1
+  push_to_hub: false
+  shard_size: 100000

@@ -1,0 +1,2 @@
+experiment_id,architecture,total_params_m,optimizer,dataset,checkpoint_step,wikitext2_ppl,hellaswag_acc,arc_easy_acc,arc_challenge_acc,boolq_acc,piqa_acc,lambada_acc,winogrande_acc,val_loss,throughput_tok_s,peak_memory_gb,eval_time,timestamp
+baseline-68M,transformer-decoder,68.72,muon,tiny-mixture,1800,47276.60786716243,0.234,,,0.375,,1.0,0.505,10.763770903887748,14791.393430470538,0.4077376,,2026-07-19T03:42:12.448220

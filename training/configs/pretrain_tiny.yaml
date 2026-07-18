@@ -1,0 +1,120 @@
+# training/configs/pretrain_tiny.yaml
+# Baseline pretraining config for MacBook Air M4 (16 GB)
+# Tiny mixture: 250K docs, ~213M tokens
+
+# ──────────────────────────────────────────────────────────────────────────────
+# MODEL
+# ──────────────────────────────────────────────────────────────────────────────
+model:
+  vocab_size: 32000
+  d_model: 576
+  n_heads: 8
+  n_layers: 6
+  d_ff: 2304
+  dropout: 0.0
+  max_seq_len: 1024           # Reduced from 2048 for MPS memory
+  norm_type: "rmsnorm"
+  activation: "swiglu"
+  rope: true
+  rope_base: 10000.0
+  flash_attention: false      # Disabled — not available on MPS
+  gradient_checkpointing: true
+  tie_weights: false
+  bias: false
+
+# ──────────────────────────────────────────────────────────────────────────────
+# TOKENIZER
+# ──────────────────────────────────────────────────────────────────────────────
+tokenizer:
+  type: "sentencepiece"
+  vocab_size: 32000
+  model_path: "training/tokenizer/pretrain_tokenizer.model"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# DATASET
+# ──────────────────────────────────────────────────────────────────────────────
+dataset:
+  path: "datasets/mixtures/tiny/corpus.jsonl"
+  max_seq_len: 1024
+  val_split: 0.05             # 5% for validation (~12.5K docs)
+  num_workers: 2              # Conservative for laptop
+  pin_memory: false           # MPS doesn't support pinned memory
+
+# ──────────────────────────────────────────────────────────────────────────────
+# TRAINING
+# ──────────────────────────────────────────────────────────────────────────────
+training:
+  # Optimizer
+  optimizer: "muon"
+  learning_rate: 3.0e-4
+  min_lr: 3.0e-5
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  eps: 1.0e-8
+  momentum: 0.95
+  grad_clip: 1.0
+
+  # Schedule
+  scheduler: "cosine"
+  warmup_steps: 200
+  max_steps: 2000         # ~1 epoch on tiny mixture
+  eval_every: 200
+  save_every: 500
+  log_every: 50
+
+  # Batch size — tuned for 16 GB MPS
+  batch_size: 4
+  gradient_accumulation_steps: 8   # Effective batch = 32
+
+  # Mixed precision — FP32 on MPS (BF16 not supported)
+  dtype: "fp32"
+  compile: false              # Disabled — torch.compile unstable on MPS
+
+  # EMA
+  use_ema: true
+  ema_decay: 0.9999
+
+  # Checkpointing
+  checkpoint_dir: "training/checkpoints"
+  keep_last_n: 3
+
+  # Logging
+  log_dir: "training/logs"
+  experiment_dir: "experiments"
+  tensorboard: true
+  csv: true
+  wandb: false
+
+  # Validation
+  eval_steps: 50
+
+  # Stability features
+  nan_recovery: true
+  nan_max_retries: 3
+  nan_skip_batches: 10
+
+  early_stop_patience: 0
+  early_stop_min_delta: 1e-4
+
+  spike_detection: true
+  spike_threshold: 2.0
+  spike_window: 50
+  spike_rollback: true
+
+  # Seed
+  seed: 42
+
+# ──────────────────────────────────────────────────────────────────────────────
+# EVALUATION
+# ──────────────────────────────────────────────────────────────────────────────
+evaluation:
+  max_new_tokens: 150
+  temperature: 0.8
+  top_k: 50
+  top_p: 0.95
+  num_samples: 3
+  prompts:
+    - "The history of artificial intelligence begins with"
+    - "In quantum computing, the fundamental unit is"
+    - "Python is a programming language that"

@@ -1,0 +1,23 @@
+mode: stream                         # "stream" or "local"; stream avoids full download
+seed: 42
+
+preprocessing:
+  remove_empty: true
+  remove_html: true
+  normalize_unicode: true
+  normalize_whitespace: true
+  deduplicate: true
+  min_length: 50                     # drop documents shorter than 50 characters
+  max_length: 100000                 # drop documents longer than 100k characters
+  filter_language: null              # null = keep all, "en" = english only
+
+datasets:
+  fineweb:
+    documents: 200000
+  wikipedia:
+    documents: 50000
+
+output:
+  format: jsonl                      # "jsonl" or "arrow"
+  path: datasets/mixtures/tiny
+  save_tokenizer_data: true          # write clean .txt files for tokenizer training

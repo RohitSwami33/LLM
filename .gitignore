@@ -57,3 +57,10 @@ pipeline_state.json
 
 # Build outputs
 build_*.log
+
+# Kaggle
+kaggle_project.zip
+kaggle_upload/
+kaggle_output/
+training/checkpoints/kaggle/
+/kaggle*

@@ -1,0 +1,26 @@
+# configs/research.yaml
+# Research dataset: ~400K documents
+# Same mixture ratios as production (fineweb 80%, wikipedia 20%)
+
+mode: stream
+seed: 42
+
+remove_empty: true
+remove_html: true
+normalize_unicode: true
+normalize_whitespace: true
+deduplicate: true
+min_length: 50
+max_length: 100000
+
+fineweb:
+  documents: 320000
+
+wikipedia:
+  documents: 80000
+
+output:
+  format: jsonl
+  path: datasets/research
+
+save_tokenizer_data: true

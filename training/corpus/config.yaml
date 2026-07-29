@@ -1,0 +1,99 @@
+# training/corpus/config.yaml
+# Default corpus cleaning configuration
+#
+# Usage:
+#   python -m training.corpus.clean --config training/corpus/config.yaml --input input.jsonl --output output.jsonl
+
+# ─── Text Normalization ─────────────────────────────────────────────────────
+normalize: true
+
+# ─── Content Filters ────────────────────────────────────────────────────────
+# Each filter returns (keep, reason). Statistical/heuristic — no keyword blacklists.
+filters:
+  nsfw:
+    enabled: true
+    # Uses sexual content density analysis (>3% density = reject)
+    # Detects escort ads, explicit services, adult spam
+
+  gambling:
+    enabled: true
+    # Uses gambling content density (>2% density = reject)
+    # Detects casino, poker, betting spam
+
+  seo_spam:
+    enabled: true
+    # Uses URL density (>10%), keyword stuffing (>8%), link farm patterns
+    # Detects SEO spam, keyword stuffing, excessive capitalization
+
+  html_code:
+    enabled: true
+    # Detects HTML boilerplate (>30% tag density), CSS blocks, JavaScript,
+    # XML declarations, JSON blobs, base64, minified code
+
+  repeated_content:
+    enabled: true
+    # Detects repeated characters (6+), repeated words (4+), repeated lines (>30%)
+
+  language_quality:
+    enabled: true
+    # Checks: alphabetic ratio (<50% = reject), URL density (>15%),
+    # punctuation density (>40%), character entropy (<3.0), OCR garbage, mojibake
+
+  ocr_garbage:
+    enabled: true
+    # Detects OCR artifacts and garbled text (>5% artifact density)
+
+  document_length:
+    enabled: true
+    min_length: 50        # Minimum characters
+    max_length: 100000    # Maximum characters (split long docs)
+    split_long: true      # Split instead of discarding long docs
+    split_max: 10000      # Max chunk size when splitting
+
+  unicode_quality:
+    enabled: true
+    # Detects control characters, replacement characters, excessive non-BMP chars
+
+  language:
+    enabled: true
+    # English content detection using statistical heuristics
+    # Checks common English word coverage (>15%) and Latin character ratio (>50%)
+
+# ─── Quality Thresholds ─────────────────────────────────────────────────────
+# Each threshold is (min, max) or null to disable.
+# Documents outside thresholds are filtered.
+quality:
+  enabled: true
+  url_ratio: [0.0, 0.15]           # Max 15% URL characters
+  digit_ratio: [0.0, 0.5]          # Max 50% digit characters
+  symbol_ratio: [0.0, 0.3]         # Max 30% symbol characters
+  duplicate_line_ratio: [0.0, 0.5] # Max 50% duplicate lines
+  avg_word_length: [2.0, 15.0]     # Word length range
+  max_token_freq: [0.0, 0.15]      # Max 15% single token frequency
+  char_entropy: [3.0, 8.0]         # Character entropy range
+  compression_ratio: [0.2, 0.9]    # Zlib compression ratio range
+  type_token_ratio: [0.1, 1.0]     # Lexical diversity range
+  min_words: 10                     # Minimum word count
+  min_sentences: 1                  # Minimum sentence count
+
+# ─── Deduplication ──────────────────────────────────────────────────────────
+deduplication:
+  enabled: true
+
+  # Exact deduplication (always enabled)
+  # Uses SHA-256 hash on normalized text
+
+  # MinHash-based approximate deduplication
+  minhash:
+    enabled: true
+    num_hashes: 128       # Number of hash functions
+    num_bands: 16         # Number of LSH bands
+    shingle_size: 5       # Word shingle size
+    threshold: 0.8        # Similarity threshold
+
+  # Near-duplicate detection (slower, uses Jaccard similarity)
+  near_duplicate:
+    enabled: false        # Disabled by default for speed
+    threshold: 0.8        # Jaccard similarity threshold
+    window_size: 10000    # Recent documents window
+    shingle_size: 3       # Word shingle size

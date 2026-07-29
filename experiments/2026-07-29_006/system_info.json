@@ -1,0 +1,41 @@
+{
+  "python": {
+    "version": "3.14.4 (main, Apr  7 2026, 13:13:20) [Clang 17.0.0 (clang-1700.6.4.2)]",
+    "version_short": "3.14.4",
+    "implementation": "cpython",
+    "compiler": 0
+  },
+  "pytorch": {
+    "version": "2.13.0",
+    "cuda_available": false,
+    "mps_available": true
+  },
+  "cuda": {
+    "available": false
+  },
+  "mps": {
+    "available": true,
+    "built": true
+  },
+  "os": {
+    "system": "Darwin",
+    "release": "24.6.0",
+    "version": "Darwin Kernel Version 24.6.0: Mon Jul 14 11:30:40 PDT 2025; root:xnu-11417.140.69~1/RELEASE_ARM64_T8132",
+    "machine": "arm64",
+    "processor": "arm",
+    "platform": "macOS-15.6.1-arm64-arm-64bit-Mach-O",
+    "hostname": "Rohits-MacBook-Air.local"
+  },
+  "hardware": {
+    "cpu_count": 10,
+    "total_ram_gb": 17.18
+  },
+  "git": {
+    "available": true,
+    "commit_hash": "8803dc3585779a4f1449e84d4d03e5f552c1b58d",
+    "commit_message": "Baseline v1 + Sparse MoE architecture",
+    "branch": "main",
+    "repo_url": "https://github.com/RohitSwami33/LLM.git",
+    "dirty": true
+  }
+}

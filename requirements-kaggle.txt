@@ -1,0 +1,26 @@
+# requirements-kaggle.txt
+# Kaggle-specific dependencies (supplements requirements.txt)
+
+# Core training
+torch>=2.1.0
+sentencepiece>=0.2.0
+tokenizers>=0.15.0
+PyYAML>=6.0
+
+# Dataset
+datasets>=2.18.0
+huggingface_hub>=0.22.0
+tqdm>=4.66.0
+
+# Logging
+tensorboard>=2.14.0
+
+# Kaggle API
+kaggle>=1.6.0
+
+# Optimization
+ftfy>=6.1.0
+numpy>=1.24.0
+
+# Flash attention (pre-installed on Kaggle)
+# xformers>=0.0.22  # Uncomment if needed

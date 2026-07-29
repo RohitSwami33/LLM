@@ -1,0 +1,5 @@
+commit: 8803dc3585779a4f1449e84d4d03e5f552c1b58d
+branch: main
+message: Baseline v1 + Sparse MoE architecture
+repo: https://github.com/RohitSwami33/LLM.git
+dirty: True

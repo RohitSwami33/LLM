@@ -1,0 +1,81 @@
+model:
+  vocab_size: 32000
+  d_model: 576
+  n_heads: 8
+  n_layers: 6
+  d_ff: 2304
+  dropout: 0.0
+  max_seq_len: 2048
+  norm_type: rmsnorm
+  activation: swiglu
+  rope: true
+  rope_base: 10000.0
+  flash_attention: false
+  gradient_checkpointing: true
+  tie_weights: false
+  bias: false
+tokenizer:
+  type: sentencepiece
+  vocab_size: 32000
+  model_path: datasets/research_v2/tokenizer/tokenizer.model
+dataset:
+  path: datasets/research_v2/corpus.jsonl
+  max_seq_len: 2048
+  train_split: 0.95
+  val_split: 0.05
+  num_workers: 2
+  pin_memory: true
+  packing: true
+  pack_factor: 4
+training:
+  optimizer: muon
+  learning_rate: 0.0003
+  min_lr: 3.0e-05
+  weight_decay: 0.1
+  beta1: 0.9
+  beta2: 0.95
+  eps: 1.0e-08
+  momentum: 0.95
+  grad_clip: 1.0
+  scheduler: cosine
+  warmup_steps: 2000
+  max_steps: 500
+  batch_size: 8
+  gradient_accumulation_steps: 4
+  dtype: bf16
+  compile: false
+  use_ema: true
+  ema_decay: 0.9999
+  save_every: 1000
+  keep_last_n: 3
+  checkpoint_dir: training/checkpoints/research_v2
+  log_every: 50
+  tensorboard: true
+  wandb: false
+  wandb_project: research-v2-pretrain
+  eval_every: 1000
+  eval_every_tokens: 1000000
+  eval_steps: 100
+  experiment_dir: experiments
+  nan_recovery: true
+  nan_max_retries: 3
+  nan_skip_batches: 10
+  early_stop_patience: 0
+  early_stop_min_delta: 1e-4
+  spike_detection: true
+  spike_threshold: 2.0
+  spike_window: 100
+  spike_rollback: true
+  seed: 42
+evaluation:
+  max_new_tokens: 200
+  temperature: 0.8
+  top_k: 50
+  top_p: 0.95
+  num_samples: 3
+  prompts:
+  - 'def fibonacci(n):'
+  - The quick brown fox
+  - import numpy as np
+  - Explain quantum computing
+  - What is machine learning?

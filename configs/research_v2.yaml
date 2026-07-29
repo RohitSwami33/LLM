@@ -1,0 +1,61 @@
+# configs/research_v2.yaml
+# Research Corpus v2: Balanced mixture for small LLM experimentation (50M-500M params)
+# Total: ~400K documents
+# Sources: FineWeb 250K + Wikipedia 70K + CodeSearchNet 40K + OpenStax/arXiv 25K + FineMath 15K
+
+seed: 42
+
+sources:
+  fineweb:
+    documents: 250000
+    hf_path: HuggingFaceFW/fineweb
+    hf_config: sample-10BT
+    split: train
+    text_key: text
+
+  wikipedia:
+    documents: 70000
+    hf_path: wikimedia/wikipedia
+    hf_config: 20231101.en
+    split: train
+    text_key: text
+
+  codesearchnet:
+    documents: 40000
+    hf_path: code-search-net/code_search_net
+    hf_config: python
+    split: train
+    text_key: code
+    filters:
+      languages: [python, javascript, java, go, ruby, php]
+      min_code_len: 50
+
+  openstax:
+    documents: 15000
+    hf_path: HuggingFaceTB/openstax_paragraphs
+    split: train
+    text_key: text
+
+  arxiv:
+    documents: 10000
+    hf_path: open-index/open-arxiv
+    split: train
+    text_key: abstract
+    filters:
+      categories_regex: ^(math|physics|astro-ph|cs\.(AI|CL|LG|NE)|stat|q-bio|eess)
+
+  finemath:
+    documents: 15000
+    hf_path: HuggingFaceTB/finemath
+    hf_config: finemath-3plus
+    split: train
+    text_key: text
+
+output:
+  path: datasets/research_v2
+  format: jsonl
+
+tokenizer:
+  vocab_size: 32768
+  type: sentencepiece
+  model_type: bpe

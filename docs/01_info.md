@@ -116,3 +116,101 @@ Seven kernel versions were pushed. The first six failed for six different reason
 3. **`nn.DataParallel` hides the inner module** — always keep `raw_model` for attributes, EMA, checkpoints, and generation.
 4. **Complex-number RoPE is fragile under checkpointing/DP** — prefer the real rotate-half form.
 5. **Validate kernel metadata enums** — an invalid `machine_shape` silently picks the wrong GPU.
+
+---
+
+## 4. Project Biography — Everything at a Glance
+
+### 4.1 What we are building
+
+A from-scratch **68.7M parameter TransformerLM** (dense, decoder-only, RoPE + SwiGLU + RMSNorm) pretrained on a custom research/coding corpus, trained on **free Kaggle GPU kernels** and managed entirely from the CLI.
+
+### 4.2 The corpus
+
+| Item | Value |
+|---|---|
+| Source | `datasets/research_v2/corpus.jsonl` (mirrored to Kaggle dataset `tomiokasan/research-v2-corpus`) |
+| Docs | **384,996** |
+| Raw text | 1.28 GB |
+| Tokenized tokens | **319,003,339 (~319M)** |
+| Tokenizer | SentencePiece, **32,000** vocab (BPE), `tokenizer/tokenizer.model` |
+| Token storage | `tokens.bin`, uint16 (638 MB) |
+| Split | 95% train (147,974 seq) / 5% val (7,789 seq) |
+
+### 4.3 The model
+
+| Setting | Value |
+|---|---|
+| Params | 68,721,984 (68.7M) |
+| d_model / heads / layers | 576 / 8 / 6 |
+| d_ff | 2304 (SwiGLU) |
+| Context | **2048 tokens** |
+| Vocab | 32,000 |
+| Norm | RMSNorm (pre-norm) |
+| Positional | RoPE, base 10000 |
+| Tie weights | No |
+| Dropout | 0.0 (pretraining) |
+
+### 4.4 Training budget — the tokens question
+
+| Item | Value |
+|---|---|
+| **Max steps** | 50,000 |
+| Effective batch | 32 sequences (batch 8 across 2 GPUs, grad accum 4) |
+| Tokens per step | 32 × 2048 = **65,536** |
+| **Total training tokens** | 50,000 × 65,536 = **3,276,800,000 (~3.28B)** |
+| Epochs over corpus | 3.28B / 319M ≈ **10.3 epochs** |
+| Warmup | 2000 steps (0.4% of run), linear → 3e-4 |
+| Schedule | Cosine → min_lr 3e-5 |
+| Optimizer | AdamW (lr 3e-4, betas 0.9/0.95, wd 0.1, eps 1e-8) |
+| Grad clip | 5.0 |
+| Precision | FP16 autocast + GradScaler (loss inside autocast) |
+| EMA | On, decay 0.9999 |
+| Checkpoints | every 500 steps (keep last 3) + best.pt + final.pt |
+
+3.28B tokens ≈ 2.8× Chinchilla-optimal for 68.7M (which suggests ~1.2B), so 50k steps is a solid, slightly compute-heavy budget.
+
+### 4.5 Hardware & throughput
+
+| Item | Value |
+|---|---|
+| GPU | 2× Tesla T4 (16 GB each), `NvidiaTeslaT4` in kernel metadata |
+| Parallelism | `nn.DataParallel` (batch 4 per GPU) |
+| Throughput | **~26.4k tok/s** (11.2k tok/s single-GPU before fixes) |
+| Time per step | ~2.5 s |
+| **Estimated full run** | ~34 h (3× 12 h Kaggle sessions) |
+| Steps per 12 h session | ~17,300 |
+| GPU memory used | ~2.2 GB / 15.6 GB per GPU |
+
+### 4.6 Progress so far (current run, kernel v7)
+
+| Step | Train loss | Val loss | Val PPL | Acc | lr |
+|---|---|---|---|---|---|
+| 0 | 10.43 | — | — | 0.01% | 0 |
+| 500 | 6.87 | 6.88 | 974 | 10.1% | 7.5e-05 |
+| 650 | 6.66 | — | — | 11.3% | 9.75e-05 |
+
+Reference points: random accuracy on 32k vocab is 0.003%; a well-trained 68M model should reach ~30–45% top-1 next-token accuracy (val loss ~3.3–4.0).
+
+### 4.7 How training is run & monitored
+
+```bash
+# Push the kernel (resumes from latest /kaggle/working checkpoint if any)
+.venv/bin/kaggle kernels push -p .
+
+# Status
+.venv/bin/kaggle kernels status tomiokasan/research-v2-pretrain
+
+# Live logs (streams while running)
+PYTHONUNBUFFERED=1 .venv/bin/kaggle kernels logs tomiokasan/research-v2-pretrain --follow
+
+# Download outputs when done
+.venv/bin/kaggle kernels output tomiokasan/research-v2-pretrain -p /tmp/kaggle_out
+```
+
+### 4.8 Known constraints & caveats
+
+- **12 h session limit** — Kaggle kills GPU kernels at 12 h; current speed means ~3 sessions for 50k steps.
+- **`/kaggle/working` did not persist between kernel versions** — the v7 run started from step 0, not the step-500 checkpoint. To truly resume, checkpoints must be downloaded and re-uploaded as a dataset, or the kernel must finish in one session.
+- **Total compute**: 3.28B tokens at ~26.4k tok/s ≈ 34 GPU-hours (well within Kaggle's weekly free quota of ~30 h/wk of GPU time).
+- Accuracy at 11% (step 650) is normal — it climbs steeply after warmup ends (step 2000).

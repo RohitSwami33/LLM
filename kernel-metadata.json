@@ -1,7 +1,7 @@
 {
   "id": "tomiokasan/research-v2-pretrain",
   "title": "research-v2-pretrain",
-  "code_file": "training/kaggle/train_standalone.py",
+  "code_file": "training/kaggle/kaggle_pipeline.py",
   "language": "python",
   "kernel_type": "script",
   "is_private": true,
@@ -12,5 +12,5 @@
   "kernel_sources": [],
   "model_sources": [],
   "keywords": [],
-  "machine_shape": "T4"
+  "machine_shape": "NvidiaTeslaT4"
 }

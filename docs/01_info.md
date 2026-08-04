@@ -208,9 +208,33 @@ PYTHONUNBUFFERED=1 .venv/bin/kaggle kernels logs tomiokasan/research-v2-pretrain
 .venv/bin/kaggle kernels output tomiokasan/research-v2-pretrain -p /tmp/kaggle_out
 ```
 
-### 4.8 Known constraints & caveats
+### 4.8 Checkpoint upload / resume (kernel v8+)
 
-- **12 h session limit** — Kaggle kills GPU kernels at 12 h; current speed means ~3 sessions for 50k steps.
-- **`/kaggle/working` did not persist between kernel versions** — the v7 run started from step 0, not the step-500 checkpoint. To truly resume, checkpoints must be downloaded and re-uploaded as a dataset, or the kernel must finish in one session.
+Checkpoints are now backed up to a Kaggle dataset so the model is **downloadable at
+any moment** and training **resumes across 12 h sessions**:
+
+- After every save (`save_every=500` steps) and at the end, the pipeline stages
+  `resume.pt` (model + optimizer + scheduler + EMA + step) into
+  `checkpoint_upload/upload_<step>/` via a cheap hardlink and a background
+  (daemon) thread pushes it to the Kaggle dataset
+  [tomiokasan/research-v2-checkpoints](https://www.kaggle.com/datasets/tomiokasan/research-v2-checkpoints)
+  (`kaggle.api.dataset_create_version`, `convert_to_csv=False`,
+  `delete_old_versions=True` so the dataset stays ~1.1 GB).
+- On startup the kernel tries `kaggle.api.dataset_download_files` to fetch the
+  latest `resume.pt`; if present it loads it (newest step chosen), otherwise it
+  starts fresh. Any failure degrades gracefully to a fresh run.
+- To download the model anytime:
+  ```bash
+  .venv/bin/kaggle datasets download -d tomiokasan/research-v2-checkpoints --unzip -o -p /tmp/ckpt
+  # resume.pt contains "model", "optimizer", "scheduler", "ema", "step", "total_tokens"
+  ```
+- Versions 1-7 (2026-08-01) died with `/kaggle/working` checkpoints unreachable;
+  those checkpoints are lost. v8 restarts from step 0 but from then on every save
+  is safe in the dataset.
+
+### 4.9 Known constraints & caveats
+
+- **12 h session limit** — Kaggle kills GPU kernels at 12 h; current speed means ~3 sessions for 50k steps. Each session resumes from the checkpoint dataset automatically.
 - **Total compute**: 3.28B tokens at ~26.4k tok/s ≈ 34 GPU-hours (well within Kaggle's weekly free quota of ~30 h/wk of GPU time).
 - Accuracy at 11% (step 650) is normal — it climbs steeply after warmup ends (step 2000).
+- First resumable checkpoint for a v8 run appears at step 500 (~21 min in) — until then a sudden session loss loses that step window.

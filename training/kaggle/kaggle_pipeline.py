@@ -7,7 +7,10 @@ single kernel run tokenizes the attached dataset, writes tokens.bin to
 """
 import json
 import os
+import queue
+import shutil
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -18,6 +21,23 @@ CORPUS = "/kaggle/input/datasets/tomiokasan/research-v2-corpus/corpus.jsonl"
 TOKENIZER = "/kaggle/input/datasets/tomiokasan/research-v2-corpus/tokenizer/tokenizer.model"
 OUT_DIR = "/kaggle/working/tokenized"
 # ----------------------------------------------------
+
+# ---------------- CHECKPOINT UPLOAD/RESUME (Kaggle dataset) ----------------
+# Checkpoints are pushed to a Kaggle dataset so the model is downloadable at
+# any time and training can resume after the 12h session limit kills the run.
+CHECKPOINT_DATASET = "tomiokasan/research-v2-checkpoints"
+upload_queue = queue.Queue()
+
+try:
+    from kaggle.api.kaggle_api_extended import KaggleApi
+    _KAGGLE_API = KaggleApi()
+    _KAGGLE_API.authenticate()
+    KAGGLE_AVAILABLE = True
+except Exception as _e:
+    print(f"Kaggle API unavailable ({_e}); checkpoint upload/resume disabled")
+    _KAGGLE_API = None
+    KAGGLE_AVAILABLE = False
+# ---------------------------------------------------------------------------
 
 def detect_text(obj):
     if isinstance(obj, str):
@@ -457,6 +477,75 @@ def generate_samples(model, tokenizer, prompts, max_new_tokens=200, temperature=
     return results
 
 
+def download_remote_checkpoint(ckpt_dir: Path):
+    """Fetch the latest checkpoint dataset version into ckpt_dir as resume.pt."""
+    if not KAGGLE_AVAILABLE:
+        print("  Kaggle API unavailable - skipping remote checkpoint download")
+        return
+    try:
+        dl_dir = ckpt_dir / "ckpt_download"
+        dl_dir.mkdir(parents=True, exist_ok=True)
+        _KAGGLE_API.dataset_download_files(CHECKPOINT_DATASET, path=str(dl_dir),
+                                           unzip=True, quiet=True)
+        src = dl_dir / "resume.pt"
+        if src.exists():
+            dst = ckpt_dir / "resume.pt"
+            shutil.copyfile(str(src), str(dst))
+            print(f"  Downloaded remote checkpoint -> {dst.name} ({src.stat().st_size/1e6:.0f}MB)")
+        else:
+            print("  Remote checkpoint dataset present but no resume.pt yet")
+    except Exception as e:
+        print(f"  No remote checkpoint to resume from: {type(e).__name__}: {e}")
+
+
+def _enqueue_upload(ckpt_path, step, upload_dir):
+    """Stage a checkpoint for the background upload thread (cheap hardlink)."""
+    if not KAGGLE_AVAILABLE:
+        return
+    try:
+        stage = Path(upload_dir) / f"upload_{step}"
+        stage.mkdir(parents=True, exist_ok=True)
+        target = stage / "resume.pt"
+        if target.exists():
+            target.unlink()
+        try:
+            os.link(ckpt_path, target)
+        except OSError:
+            shutil.copyfile(ckpt_path, target)
+        with open(stage / "dataset-metadata.json", "w") as f:
+            json.dump({"id": CHECKPOINT_DATASET, "title": "research-v2-checkpoints",
+                       "licenses": [{"name": "other"}]}, f, indent=2)
+        with open(stage / "latest_step.txt", "w") as f:
+            f.write(f"{step}\n")
+        upload_queue.put(stage)
+        print(f"  [upload] queued {stage.name}")
+    except Exception as e:
+        print(f"  [upload] queue failed: {type(e).__name__}: {e}")
+
+
+def _upload_worker():
+    while True:
+        stage = upload_queue.get()
+        try:
+            if stage is None:
+                return
+            for attempt in range(1, 4):
+                try:
+                    t0 = time.time()
+                    _KAGGLE_API.dataset_create_version(
+                        str(stage), version_notes=f"step {stage.name.split('_')[-1]}",
+                        quiet=True, convert_to_csv=False, delete_old_versions=True)
+                    print(f"  [upload] {stage.name} pushed in {time.time()-t0:.0f}s")
+                    break
+                except Exception as e:
+                    print(f"  [upload] {stage.name} attempt {attempt}/3 failed: {type(e).__name__}: {e}")
+                    time.sleep([15, 60, 300][attempt - 1])
+            else:
+                print(f"  [upload] GAVE UP on {stage.name}; next save will re-upload")
+        finally:
+            upload_queue.task_done()
+
+
 def run_training():
     print("\n" + "=" * 60)
     print("STEP 2/2: TRAINING")
@@ -471,6 +560,11 @@ def run_training():
         CORPUS_DIR = Path("datasets/research_v2")
         WORKING = Path(".")
         TOKENIZED_DIR = WORKING / "tokenized"
+
+    upload_dir = WORKING / "checkpoint_upload"
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    if KAGGLE_AVAILABLE:
+        threading.Thread(target=_upload_worker, daemon=True).start()
 
     config = {
         "model": {"vocab_size": 32000, "d_model": 576, "n_heads": 8, "n_layers": 6,
@@ -491,6 +585,15 @@ def run_training():
                                    "What is machine learning?"],
                        "temperature": 0.8, "max_new_tokens": 200},
     }
+
+    if os.environ.get("PP_SMOKE"):
+        config["model"].update({"d_model": 64, "n_heads": 4, "n_layers": 2, "d_ff": 256,
+                                "max_seq_len": 128, "flash_attention": False,
+                                "gradient_checkpointing": False})
+        config["training"].update({"max_steps": int(os.environ.get("PP_SMOKE_STEPS", "16")),
+                                   "batch_size": 2, "gradient_accumulation_steps": 2,
+                                   "save_every": 4, "eval_every": 4, "warmup_steps": 2})
+        config["evaluation"]["max_new_tokens"] = 16
 
     model_cfg = config.get("model", {})
     train_cfg = config.get("training", {})
@@ -597,17 +700,36 @@ def run_training():
     total_tokens_count = 0
     best_val_loss = float("inf")
 
-    for f in sorted(ckpt_dir.glob("step_*.pt"), key=lambda p: p.stat().st_mtime):
+    download_remote_checkpoint(ckpt_dir)
+    candidates = sorted(ckpt_dir.glob("step_*.pt"), key=lambda p: p.stat().st_mtime)
+    if (ckpt_dir / "resume.pt").exists():
+        candidates.append(ckpt_dir / "resume.pt")
+
+    def _ckpt_step(p):
+        name = p.name
+        if name == "resume.pt":
+            return 10**9
+        return int(name.replace("step_", "").replace(".pt", "")) if name.startswith("step_") else -1
+
+    for f in sorted(candidates, key=_ckpt_step, reverse=True):
         try:
-            ckpt = load_checkpoint(str(f), raw_model, optimizer, scheduler, scaler, device)
-            global_step = ckpt["step"]
-            total_tokens_count = ckpt["total_tokens"]
+            ckpt = torch.load(str(f), map_location="cpu", weights_only=False)
+            raw_model.load_state_dict(ckpt["model"])
+            if "optimizer" in ckpt:
+                optimizer.load_state_dict(ckpt["optimizer"])
+            if scheduler and "scheduler" in ckpt:
+                scheduler.load_state_dict(ckpt["scheduler"])
+            if scaler and "scaler" in ckpt:
+                scaler.load_state_dict(ckpt["scaler"])
+            if ema and "ema" in ckpt:
+                ema.load_state_dict(ckpt["ema"])
+            global_step = ckpt.get("step", 0)
+            total_tokens_count = ckpt.get("total_tokens", 0)
             best_val_loss = ckpt.get("best_val_loss", float("inf"))
-            if ema and "ema" in torch.load(str(f), map_location="cpu", weights_only=False):
-                ema.load_state_dict(torch.load(str(f), map_location="cpu", weights_only=False)["ema"])
             print(f"  Resumed from {f.name} at step {global_step}")
             break
-        except Exception:
+        except Exception as e:
+            print(f"  Failed to load {f.name}: {type(e).__name__}: {e}")
             continue
 
     grad_accum = train_cfg.get("gradient_accumulation_steps", 8)
@@ -703,6 +825,7 @@ def run_training():
                     old = sorted(ckpt_dir.glob("step_*.pt"), key=lambda p: p.stat().st_mtime)
                     for f in old[:-train_cfg.get("keep_last_n", 3)]:
                         f.unlink()
+                    _enqueue_upload(str(path), global_step, upload_dir)
 
                 if global_step % eval_every == 0:
                     print(f"\n  --- Eval at step {global_step} ---")
@@ -723,6 +846,7 @@ def run_training():
     save_checkpoint(str(ckpt_dir / "final.pt"), raw_model, optimizer, scheduler, scaler, ema=ema,
                    step=global_step, total_tokens=total_tokens_count,
                    extra={"best_val_loss": best_val_loss})
+    _enqueue_upload(str(ckpt_dir / "final.pt"), global_step, upload_dir)
 
     print(f"\n  --- Sample Generation ---")
     model.eval()
@@ -761,6 +885,14 @@ def run_training():
     with open(log_dir / "kaggle_report.json", "w") as f:
         json.dump(report, f, indent=2)
     csv_file.close()
+
+    if KAGGLE_AVAILABLE:
+        print("  Waiting for pending checkpoint uploads...")
+        deadline = time.time() + 1800
+        while upload_queue.unfinished_tasks > 0 and time.time() < deadline:
+            time.sleep(10)
+        if upload_queue.unfinished_tasks > 0:
+            print("  WARNING: upload queue still non-empty; uploads will finish in background")
 
     print(f"\n{'=' * 60}")
     print(f"  TRAINING COMPLETE")

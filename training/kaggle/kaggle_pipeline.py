@@ -37,6 +37,11 @@ except Exception as _e:
     print(f"Kaggle API unavailable ({_e}); checkpoint upload/resume disabled")
     _KAGGLE_API = None
     KAGGLE_AVAILABLE = False
+
+# Never touch the real checkpoint dataset from local smoke runs
+if os.environ.get("PP_SMOKE"):
+    _KAGGLE_API = None
+    KAGGLE_AVAILABLE = False
 # ---------------------------------------------------------------------------
 
 def detect_text(obj):
@@ -494,6 +499,7 @@ def download_remote_checkpoint(ckpt_dir: Path):
             print(f"  Downloaded remote checkpoint -> {dst.name} ({src.stat().st_size/1e6:.0f}MB)")
         else:
             print("  Remote checkpoint dataset present but no resume.pt yet")
+        shutil.rmtree(dl_dir, ignore_errors=True)
     except Exception as e:
         print(f"  No remote checkpoint to resume from: {type(e).__name__}: {e}")
 
@@ -544,6 +550,7 @@ def _upload_worker():
                 print(f"  [upload] GAVE UP on {stage.name}; next save will re-upload")
         finally:
             upload_queue.task_done()
+            shutil.rmtree(stage, ignore_errors=True)
 
 
 def run_training():
@@ -826,6 +833,8 @@ def run_training():
                     for f in old[:-train_cfg.get("keep_last_n", 3)]:
                         f.unlink()
                     _enqueue_upload(str(path), global_step, upload_dir)
+                    du = shutil.disk_usage(str(ckpt_dir)) if is_kaggle else shutil.disk_usage(".")
+                    print(f"  [disk] {du.used/1e9:.1f}GB used / {du.total/1e9:.1f}GB")
 
                 if global_step % eval_every == 0:
                     print(f"\n  --- Eval at step {global_step} ---")

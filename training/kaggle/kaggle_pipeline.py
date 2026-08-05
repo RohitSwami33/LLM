@@ -739,6 +739,8 @@ def run_training():
             print(f"  Failed to load {f.name}: {type(e).__name__}: {e}")
             continue
 
+    resumed_tokens = total_tokens_count
+
     grad_accum = train_cfg.get("gradient_accumulation_steps", 8)
     grad_accum = max(1, grad_accum // max(1, n_gpu))
     grad_clip = train_cfg.get("grad_clip", 5.0)
@@ -807,7 +809,7 @@ def run_training():
                     train_acc = train_acc_sum / max(train_acc_count, 1)
                     lr_now = optimizer.param_groups[0]["lr"]
                     elapsed = time.time() - train_start
-                    tok_s = total_tokens_count / max(elapsed, 1)
+                    tok_s = (total_tokens_count - resumed_tokens) / max(elapsed, 1)
                     gpu_mem = torch.cuda.memory_allocated() / 1e6 if torch.cuda.is_available() else 0
                     print(f"  Step {global_step:>6d} | tok {total_tokens_count/1e6:>8.1f}M | "
                           f"loss: {avg_loss:.4f} | acc: {train_acc:.4f} | "

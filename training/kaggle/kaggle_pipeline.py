@@ -59,13 +59,24 @@ def detect_text(obj):
     return None
 
 
+def _env_paths():
+    """Corpus/tokenizer/output paths for the current runtime (Kaggle/Colab/local)."""
+    if os.path.exists("/kaggle/input"):
+        return CORPUS, TOKENIZER, OUT_DIR
+    if os.path.exists("/content"):
+        return ("/content/datasets_dl/corpus.jsonl",
+                "/content/datasets_dl/tokenizer/tokenizer.model",
+                "/content/tokenized")
+    return ("datasets/research_v2/corpus.jsonl",
+            "datasets/research_v2/tokenizer/tokenizer.model",
+            "tokenized")
+
+
 def run_pretokenize():
     print("=" * 60)
     print("STEP 1/2: PRETOKENIZATION")
     print("=" * 60)
-    corpus = Path(CORPUS)
-    tokenizer = Path(TOKENIZER)
-    out = Path(OUT_DIR)
+    corpus, tokenizer, out = map(Path, _env_paths())
 
     if not corpus.exists():
         raise FileNotFoundError(f"Corpus not found:\n{corpus}")
@@ -563,6 +574,10 @@ def run_training():
         CORPUS_DIR = Path("/kaggle/input/datasets/tomiokasan/research-v2-corpus")
         WORKING = Path("/kaggle/working")
         TOKENIZED_DIR = WORKING / "tokenized"
+    elif os.path.exists("/content"):
+        CORPUS_DIR = Path("/content/datasets_dl")
+        WORKING = Path("/content")
+        TOKENIZED_DIR = WORKING / "tokenized"
     else:
         CORPUS_DIR = Path("datasets/research_v2")
         WORKING = Path(".")
@@ -835,7 +850,7 @@ def run_training():
                     for f in old[:-train_cfg.get("keep_last_n", 3)]:
                         f.unlink()
                     _enqueue_upload(str(path), global_step, upload_dir)
-                    du = shutil.disk_usage(str(ckpt_dir)) if is_kaggle else shutil.disk_usage(".")
+                    du = shutil.disk_usage(str(WORKING))
                     print(f"  [disk] {du.used/1e9:.1f}GB used / {du.total/1e9:.1f}GB")
 
                 if global_step % eval_every == 0:

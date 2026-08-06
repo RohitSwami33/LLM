@@ -17,8 +17,18 @@ from pathlib import Path
 import numpy as np
 
 # ---------------- PRETOKENIZE CONFIG ----------------
-# Owner-aware: kernels set KAGGLE_USERNAME automatically; Colab/local can set PP_OWNER.
-_OWNER = os.environ.get("PP_OWNER") or os.environ.get("KAGGLE_USERNAME") or "tomiokasan"
+def _detect_owner():
+    """Account owning the data: PP_OWNER env > KAGGLE_USERNAME env > mounted dataset > default."""
+    env = os.environ.get("PP_OWNER") or os.environ.get("KAGGLE_USERNAME")
+    if env:
+        return env
+    if os.path.isdir("/kaggle/input/datasets"):
+        for p in sorted(Path("/kaggle/input/datasets").glob("*/research-v2-corpus")):
+            return p.parent.name
+    return "tomiokasan"
+
+
+_OWNER = _detect_owner()
 CORPUS_DATASET = f"{_OWNER}/research-v2-corpus"
 CORPUS = f"/kaggle/input/datasets/{CORPUS_DATASET}/corpus.jsonl"
 TOKENIZER = f"/kaggle/input/datasets/{CORPUS_DATASET}/tokenizer/tokenizer.model"
@@ -34,7 +44,18 @@ upload_queue = queue.Queue()
 try:
     from kaggle.api.kaggle_api_extended import KaggleApi
     _KAGGLE_API = KaggleApi()
-    _KAGGLE_API.authenticate()
+    _kagg_ok = False
+    _kagg_last = None
+    for _attempt in range(5):
+        try:
+            _KAGGLE_API.authenticate()
+            _kagg_ok = True
+            break
+        except Exception as _e:
+            _kagg_last = _e
+            time.sleep(10 * (_attempt + 1))
+    if not _kagg_ok:
+        raise _kagg_last
     KAGGLE_AVAILABLE = True
 except Exception as _e:
     print(f"Kaggle API unavailable ({_e}); checkpoint upload/resume disabled")

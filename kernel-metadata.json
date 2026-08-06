@@ -1,5 +1,5 @@
 {
-  "id": "tomiokasan/research-v2-pretrain",
+  "id": "roronoazoro3008/research-v2-pretrain",
   "title": "research-v2-pretrain",
   "code_file": "training/kaggle/kaggle_pipeline.py",
   "language": "python",
@@ -7,7 +7,7 @@
   "is_private": true,
   "enable_gpu": true,
   "enable_internet": true,
-  "dataset_sources": ["tomiokasan/research-v2-corpus"],
+  "dataset_sources": ["roronoazoro3008/research-v2-corpus"],
   "competition_sources": [],
   "kernel_sources": [],
   "model_sources": [],

@@ -17,15 +17,18 @@ from pathlib import Path
 import numpy as np
 
 # ---------------- PRETOKENIZE CONFIG ----------------
-CORPUS = "/kaggle/input/datasets/tomiokasan/research-v2-corpus/corpus.jsonl"
-TOKENIZER = "/kaggle/input/datasets/tomiokasan/research-v2-corpus/tokenizer/tokenizer.model"
+# Owner-aware: kernels set KAGGLE_USERNAME automatically; Colab/local can set PP_OWNER.
+_OWNER = os.environ.get("PP_OWNER") or os.environ.get("KAGGLE_USERNAME") or "tomiokasan"
+CORPUS_DATASET = f"{_OWNER}/research-v2-corpus"
+CORPUS = f"/kaggle/input/datasets/{CORPUS_DATASET}/corpus.jsonl"
+TOKENIZER = f"/kaggle/input/datasets/{CORPUS_DATASET}/tokenizer/tokenizer.model"
 OUT_DIR = "/kaggle/working/tokenized"
 # ----------------------------------------------------
 
 # ---------------- CHECKPOINT UPLOAD/RESUME (Kaggle dataset) ----------------
 # Checkpoints are pushed to a Kaggle dataset so the model is downloadable at
 # any time and training can resume after the 12h session limit kills the run.
-CHECKPOINT_DATASET = "tomiokasan/research-v2-checkpoints"
+CHECKPOINT_DATASET = f"{_OWNER}/research-v2-checkpoints"
 upload_queue = queue.Queue()
 
 try:
@@ -571,7 +574,7 @@ def run_training():
 
     is_kaggle = os.path.exists("/kaggle/working")
     if is_kaggle:
-        CORPUS_DIR = Path("/kaggle/input/datasets/tomiokasan/research-v2-corpus")
+        CORPUS_DIR = Path(f"/kaggle/input/datasets/{CORPUS_DATASET}")
         WORKING = Path("/kaggle/working")
         TOKENIZED_DIR = WORKING / "tokenized"
     elif os.path.exists("/content"):

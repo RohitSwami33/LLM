@@ -34,7 +34,9 @@ def main():
         from kaggle.api.kaggle_api_extended import KaggleApi
         api = KaggleApi()
         api.authenticate()
-        api.dataset_download_files("tomiokasan/research-v2-corpus",
+        owner = api.config_values.get(api.CONFIG_NAME_USER, "tomiokasan")
+        os.environ["PP_OWNER"] = owner
+        api.dataset_download_files(f"{owner}/research-v2-corpus",
                                    path="/content/datasets_dl", unzip=True, quiet=True)
         if not corpus.exists():
             raise RuntimeError("corpus download failed")

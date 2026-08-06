@@ -40,32 +40,41 @@ OUT_DIR = "/kaggle/working/tokenized"
 # any time and training can resume after the 12h session limit kills the run.
 CHECKPOINT_DATASET = f"{_OWNER}/research-v2-checkpoints"
 upload_queue = queue.Queue()
+_KAGGLE_API = None
+KAGGLE_AVAILABLE = False
 
-try:
-    from kaggle.api.kaggle_api_extended import KaggleApi
-    _KAGGLE_API = KaggleApi()
-    _kagg_ok = False
-    _kagg_last = None
-    for _attempt in range(5):
+
+def _ensure_kaggle():
+    """Lazily init the Kaggle API client. Network is often not up at boot,
+    so authenticate only when actually needed (download/upload time)."""
+    global _KAGGLE_API, KAGGLE_AVAILABLE
+    if KAGGLE_AVAILABLE:
+        return True
+    if os.environ.get("PP_SMOKE"):
+        return False
+    try:
+        from kaggle.api.kaggle_api_extended import KaggleApi
         try:
-            _KAGGLE_API.authenticate()
-            _kagg_ok = True
-            break
+            api = KaggleApi()
+            api.authenticate()
+            _KAGGLE_API = api
+            KAGGLE_AVAILABLE = True
+            return True
         except Exception as _e:
-            _kagg_last = _e
-            time.sleep(10 * (_attempt + 1))
-    if not _kagg_ok:
-        raise _kagg_last
-    KAGGLE_AVAILABLE = True
-except Exception as _e:
-    print(f"Kaggle API unavailable ({_e}); checkpoint upload/resume disabled")
-    _KAGGLE_API = None
-    KAGGLE_AVAILABLE = False
+            print(f"  [kaggle] auth failed: {type(_e).__name__}")
+            return False
+    except Exception as _e:
+        print(f"  [kaggle] API unavailable: {type(_e).__name__}: {_e}")
+        return False
 
-# Never touch the real checkpoint dataset from local smoke runs
-if os.environ.get("PP_SMOKE"):
-    _KAGGLE_API = None
-    KAGGLE_AVAILABLE = False
+
+def _ensure_kaggle_retry(tries=5, backoff=10):
+    """_ensure_kaggle with retries, for startup/background contexts only."""
+    for attempt in range(tries):
+        if _ensure_kaggle():
+            return True
+        time.sleep(backoff * (attempt + 1))
+    return False
 # ---------------------------------------------------------------------------
 
 def detect_text(obj):
@@ -519,7 +528,7 @@ def generate_samples(model, tokenizer, prompts, max_new_tokens=200, temperature=
 
 def download_remote_checkpoint(ckpt_dir: Path):
     """Fetch the latest checkpoint dataset version into ckpt_dir as resume.pt."""
-    if not KAGGLE_AVAILABLE:
+    if not _ensure_kaggle_retry():
         print("  Kaggle API unavailable - skipping remote checkpoint download")
         return
     try:
@@ -541,7 +550,7 @@ def download_remote_checkpoint(ckpt_dir: Path):
 
 def _enqueue_upload(ckpt_path, step, upload_dir):
     """Stage a checkpoint for the background upload thread (cheap hardlink)."""
-    if not KAGGLE_AVAILABLE:
+    if not _ensure_kaggle():
         return
     try:
         stage = Path(upload_dir) / f"upload_{step}"
@@ -569,6 +578,9 @@ def _upload_worker():
         stage = upload_queue.get()
         try:
             if stage is None:
+                return
+            if not _ensure_kaggle_retry(tries=3, backoff=10):
+                print(f"  [upload] {stage.name} skipped: kaggle API unavailable")
                 return
             for attempt in range(1, 4):
                 try:
@@ -609,8 +621,7 @@ def run_training():
 
     upload_dir = WORKING / "checkpoint_upload"
     upload_dir.mkdir(parents=True, exist_ok=True)
-    if KAGGLE_AVAILABLE:
-        threading.Thread(target=_upload_worker, daemon=True).start()
+    threading.Thread(target=_upload_worker, daemon=True).start()
 
     config = {
         "model": {"vocab_size": 32000, "d_model": 576, "n_heads": 8, "n_layers": 6,

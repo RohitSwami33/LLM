@@ -14,17 +14,12 @@ entirely from the CLI).
 
 | Item | Value |
 |---|---|
-| Kernel | `roronoazoro3008/research-v2-pretrain` (version 1 of the new account) |
-| Running on | 1x Tesla T4, 12 h session |
-| Started from | **step 24,500** (auto-resumed from checkpoint dataset) |
-| Last seen | **step ~29,600 / 50,000** (~3.8 h elapsed, ~2.5 s/step, ~1,420 steps/h) |
-| Throughput | ~25.9–27.4k tok/s, 2.2 GB VRAM |
-| Val metrics @ step 29,500 | loss **4.6422**, PPL **103.77**, acc **25.86%** |
-| Checkpoints | uploaded to Kaggle dataset every 500 steps (`[upload] upload_XXXXX pushed in ~50s`) |
-| Disk in kernel | 6.1 GB / 21 GB (stable) |
+| Kernel | `roronoazoro3008/research-v2-pretrain` — **COMPLETE** ✅ |
+| Result | **50,000 / 50,000 steps**, 3,276.8M tokens, 6.31 h (final 41k→50k push) |
+| Final | Best val loss **4.5870** (PPL ≈ 98.2), final checkpoint `resume.pt` in dataset |
+| Checkpoints | `roronoazoro3008/research-v2-checkpoints` (version refreshed at kernel end) |
 
-Projection: the 12 h session ends around **step ~41k** (rate-limited by 12 h, not 50k);
-one short follow-up push (~6.5 h) finishes 50k.
+**Pretraining is DONE** — the SFT/DPO base is the final `resume.pt`.
 
 ---
 
@@ -178,9 +173,8 @@ python -c "..."  # get_accelerator_quota_statistics via KaggleApi, see §4.3
 
 ## 8. Roadmap
 
-1. Finish 50k — session currently ends ~41k; one short re-push (resume 41k → 50k,
-   needs `max_steps` bump) completes pretraining.
-2. **Post-training** (after 50k): SFT on curated data, then preference tuning
+1. ~~Finish 50k~~ — **DONE (2026-08-08):** 50,000 steps, 3.28B tokens, best val loss 4.5870.
+2. **Post-training** (next): SFT on curated data, then preference tuning
    (DPO/KTO-style, following the Cursor post-training playbook) to lift accuracy/behavior.
    Base = final `resume.pt` from the checkpoint dataset.
 3. Evals against the repo's evaluation harness on the way.
@@ -206,4 +200,4 @@ block-sparse + MuonClip, then the Kaggle/Colab run.
 
 ---
 
-*Last updated 2026-08-08 — live numbers from `roronoazoro3008/research-v2-pretrain`; v2 research track green.**
+*Last updated 2026-08-08 — **pretraining complete (50k/50k, val 4.5870)**; v2 research track green.**

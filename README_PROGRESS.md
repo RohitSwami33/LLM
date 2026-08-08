@@ -238,6 +238,27 @@ Smoke validation: `.venv/bin/python -m research_hybrid.smoke_test` (9/9 PASS)
 and `PP_SMOKE=1 .venv/bin/python -c "from research_hybrid.train import run; run()"`
 (stable loss ~5.73→5.71 across the curriculum switch on synthetic data).
 
+### 9.3 The CUDA OOM saga (kernels v4→v15) — how training finally went live
+
+The first 11 v2 kernel pushes died in `train_step 0` with CUDA OOMs, each at a
+different site; every fix surfaced the next bottleneck:
+
+| Kernel | Crash site → Fix |
+|---|---|
+| v4 | `F.linear` in loss (512 MiB alloc) → still OOM: **sm75 T4 has no fused SDPA**; the `_flex_capable` (sm70+) gate was wrong — flash needs sm80+. Gate now `compute_capability[0] >= 8`, else chunked path |
+| v5 | `torch.exp` 4.5 GiB — autocast blacklists exp (fp32); a full `(B,H,T,T)` fp32 exp is huge → **sub-blocked softmax**: pass 1 scans SUB=1024-wide score blocks for the exact per-row max `m`, pass 2 accumulates `exp*V` + `den`; peak ~900 MB/sub-block, numerically identical to dense fp32 |
+| v7 | Same `F.linear` 12.68 GiB — inner per-chunk attention checkpoints **inside** the block checkpoint (nested non-reentrant) never freed memory → removed inner checkpoint |
+| v8–v9 | OOM moved to `F.cross_entropy` — outer GC switched `use_reentrant=True` + `PP_MEM_DEBUG=1` diagnostics added |
+| v10 | Diagnostics: only **3,136 MB live** after blocks but 13.2 GiB reserved → allocator fragmentation → `PYTORCH_ALLOC_CONF=expandable_segments:True` (module scope in pipeline + `train.run()`) |
+| v11 | Still OOM at CE: each loss chunk retained its fp32 CE input/softmax temps in the autograd graph (~768 MB × 16 chunks ≈ 12 GB) → `loss_chunk` 1024→512, `empty_cache()` at loss start, **per-chunk loss checkpoint** (`_chunk_ce`, `use_reentrant=False`) |
+| v14 | Forward finally flat (3,172 MB) — but OOM in `loss.backward()`: the reentrant block-checkpoint **recompute** rebuilt all 4 chunks × 8 sub-blocks of fp32 exp outputs (~18 GB) → **per-sub-block gradient checkpoints** inside `_attend` (pass 1 `_max_sub`, pass 2 `_exp_sub`) + outer GC back to `use_reentrant=False` |
+| **v15** | **FIRST HEALTHY RUN** — step 25: `loss 23.23, acc 1.85%, tok/s 1436, gpu 2404 MB`; step 50: `loss 22.71`; memory flat ~3.8 GB live, no OOM through step 50+ |
+
+Current live status: `tomiokasan/research-v2-70m` RUNNING, ~1,435 tok/s (~45 s/step).
+At that rate a 12 h session covers ~950 steps — several runs with checkpoint
+resume (`research-moe-checkpoints`) will be needed for the 4,870-step budget;
+the first checkpoint lands at step 500.
+
 ---
 
-*Last updated 2026-08-08 — **pretraining complete (50k/50k, val 4.5870)**; v2 MoE training LIVE (`tomiokasan/research-v2-70m`).**
+*Last updated 2026-08-09 — **v2 MoE training LIVE on Kaggle** (loss 23.2 → 22.7, 1,435 tok/s, T4, no OOM since the v15 memory-budgeting fixes).**

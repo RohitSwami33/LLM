@@ -64,3 +64,9 @@ kaggle_upload/
 kaggle_output/
 training/checkpoints/kaggle/
 /kaggle*
+
+# Training artifacts (regenerated)
+checkpoints/
+tokenized/
+experiments/
+checkpoint_upload/

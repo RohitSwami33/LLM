@@ -1,12 +1,12 @@
-# Pretraining Progress — 68.7M TransformerLM
+# Pretraining Progress — 68.7M TransformerLM + 70M Hybrid-MoE (v2)
 
 Status snapshot and full history of the **research-v2 pretraining project** (training
-a 68.7M-parameter decoder-only TransformerLM on free Kaggle GPU kernels, managed
-entirely from the CLI).
+a 68.7M-parameter decoder-only TransformerLM and the 70M Hybrid-MoE research model
+on free Kaggle GPU kernels, managed entirely from the CLI).
 
 > Companion docs: `docs/01_info.md` (deep postmortem of the early kernel crashes),
 > `docs/KAGGLE_SETUP.md` (Kaggle CLI/account setup), `training/kaggle/kaggle_pipeline.py`
-> (the actual training kernel).
+> (dense-68.7M kernel), `training/kaggle/kaggle_pipeline_v2.py` (MoE kernel).
 
 ---
 
@@ -128,17 +128,18 @@ Also available: `training/kaggle/colab_train.py` — same pipeline run on Colab
 
 | Account | Creds at | GPU quota | Status |
 |---|---|---|---|
-| `tomiokasan` | `~/.kaggle/kaggle.json` | 30 h/week, exhausted ~Aug 11 | old runs (v7–v9) |
-| `roronoazoro3008` | `~/.kaggle2/kaggle.json` | **30 h/week** (verified) | current runs (v4+) |
+| `tomiokasan` (renamed from `roronoazoro3008`, 2026-08) | `~/.kaggle/kaggle.json` | 30 h/week (verified) | all current runs |
 
-Kaggle datasets (per account, same slugs):
+Kaggle datasets (all under `tomiokasan/`):
 
 | Dataset | Contents | Role |
 |---|---|---|
 | `research-v2-corpus` | `corpus.jsonl` (1.28 GB) + `tokenizer/` | kernel input mount |
-| `research-v2-checkpoints` | `resume.pt` (1.1 GB) + `latest_step.txt` | checkpoint store |
+| `research-v2-checkpoints` | `resume.pt` (1.1 GB) + `latest_step.txt` | dense-68.7M checkpoint store |
+| `research-moe-code` | `research_hybrid/*.py` (flat) | v2 kernel code mount (see §9.1) |
+| `research-moe-checkpoints` | `resume.pt` + `latest_step.txt` | v2 MoE checkpoint store |
 
-Kernel metadata: `kernel-metadata.json` (points at `roronoazoro3008/research-v2-pretrain`,
+Kernel metadata: `kernel-metadata.json` (points at `tomiokasan/research-v2-70m`,
 T4, internet on). Kernel owner is auto-detected from the mounted corpus path
 (`KAGGLE_USERNAME` is NOT set inside kernels).
 
@@ -147,20 +148,23 @@ T4, internet on). Kernel owner is auto-detected from the mounted corpus path
 ## 7. Ops Cheat-Sheet
 
 ```bash
-# push the training kernel (account matters!)
-KAGGLE_CONFIG_DIR=~/.kaggle2 .venv/bin/kaggle kernels push -p .
-KAGGLE_CONFIG_DIR=~/.kaggle2 .venv/bin/kaggle kernels status roronoazoro3008/research-v2-pretrain
+# push the training kernel
+.venv/bin/kaggle kernels push -p .
+.venv/bin/kaggle kernels status tomiokasan/research-v2-70m
 
 # stream live logs (SSE endpoint; plain `kaggle kernels logs` returns empty for running sessions)
-U=roronoazoro3008; K=<key from ~/.kaggle2/kaggle.json>
-curl -s -u "$U:$K" "https://www.kaggle.com/api/v1/kernels/logs/stream/$U/research-v2-pretrain"
+U=tomiokasan; K=<key from ~/.kaggle/kaggle.json>
+curl -s -u "$U:$K" "https://www.kaggle.com/api/v1/kernels/logs/stream/$U/research-v2-70m"
 
 # check the saved checkpoints
-KAGGLE_CONFIG_DIR=~/.kaggle2 .venv/bin/kaggle datasets files roronoazoro3008/research-v2-checkpoints
+.venv/bin/kaggle datasets files tomiokasan/research-v2-checkpoints
+.venv/bin/kaggle datasets files tomiokasan/research-moe-checkpoints
+
+# update the v2 code dataset after editing research_hybrid/
+.venv/bin/python tools/push_code_dataset.py
 
 # stop a bad run (CLI has no `cancel`; delete the kernel kills the session)
 python - <<'EOF'
-import os; os.environ['KAGGLE_CONFIG_DIR'] = os.path.expanduser('~/.kaggle2')
 from kaggle.api.kaggle_api_extended import KaggleApi
 KaggleApi().authenticate()  # then api.kernels_delete('owner/slug', no_confirm=True)
 EOF
@@ -191,13 +195,49 @@ model (`research_hybrid/`), with its own design and report docs:
   anchor, FlexAttention w/ chunked fallback), deepseek_moe + shared experts,
   MuonClip optimizer (QK-Clip per-head), 8K→32K curriculum, Mamba-2 ablation (off).
 
-Status (2026-08-08): **code complete and verified** — all 9 CPU smoke tests pass
-(attention patterns vs dense reference, MoBA, Mamba-2 SSD vs naive recurrence,
-MuonClip/AdamW, KV-cache decode, EMA); `audit.py` asserts the active budget:
-**total 139.7M, active 70.68M**, ≈200 MFLOPs/token forward / ≈600 train,
-≈2.8 GB peak on T4 at B=2 × 32K. Next: training pipeline port to
-block-sparse + MuonClip, then the Kaggle/Colab run.
+Status (2026-08-08): **training is LIVE on Kaggle** — kernel
+`tomiokasan/research-v2-70m` (T4, mounts `research-v2-corpus` + `research-moe-code`).
+
+### 9.1 Training pipeline (`research_hybrid/train.py` + `kaggle_pipeline_v2.py`)
+
+- **Recipe** (design.md §7): MuonClip (Kimi K2 Algorithm 1) — 2D params Muon
+  NS-5 / 1D AdamW, `lr 0.02 / lr_1d 0.01`, warmup 375, cosine, `wd 0.1`;
+  QK-Clip τ=100 per-head (GQA min-γ over shared KV); fp16 autocast (fp32 weights,
+  no GradScaler needed); EMA decay 0.999, evaluated for val; gradient
+  checkpointing ON; curriculum 8K-causal → 32K-block_sparse at step 2435
+  (4,870 steps × 65,536 tok/step ≈ 319M tokens ≈ 16 h on T4).
+- **Boot:** STEP 0 assembles `research_hybrid/` into `/kaggle/working` from the
+  flat files of the `research-moe-code` dataset; STEP 1 pretokenizes the corpus
+  (reuses the v1 `tokens.bin` format, copies the tokenizer for generation);
+  STEP 2 trains. Checkpoints → `tomiokasan/research-moe-checkpoints`
+  (`resume.pt` + `latest_step.txt`, same upload/resume machinery as §5).
+
+### 9.2 Verified fixes found while smoke-testing the pipeline
+
+1. **MuonClip Newton–Schulz blowup** (critical): NS iterations are only stable
+   for unit-norm inputs (`x·xᵀ@x` grows with `‖x‖`); the optimizer applied NS-5
+   to the raw update and blew params up ~1e7× in one step (loss 20 → 1.9e10).
+   Fixed by normalizing `update / (‖update‖ + 1e-8)` before NS-5 (K2's
+   `G_Normalize`). `optim.py` + smoke regression.
+2. **Tied-head logit scale**: `input_scale` was applied only at the input
+   embedding; the tied LM head produced logits of RMS ~√d_model (init CE ~63 /
+   ~300 at full scale). Baked `input_scale` into the embedding weight at init.
+3. **QK-Clip NaN guard**: `gamma = clamp(tau/smax, max=1)` could go negative
+   when all attention scores are negative → `sqrt` NaN. Now `(tau/smax).
+   clamp_min(1e-8)` first.
+4. **kaggle 2.2.4 dataset-create regression**: `_upload_file` never sets
+   `UploadFile.description` (the dataset-side file name) → server rejects with
+   "Dataset url's dataset slugs and hashlink are all null". `tools/
+   push_code_dataset.py` monkeypatches it and pushes/updates `research-moe-code`
+   (flat files; the kernel reassembles the package).
+5. **Account rename**: the Kaggle account was renamed `roronoazoro3008` →
+   `tomiokasan`; old-name refs 403 on new API endpoints. All refs (kernel,
+   datasets, checkpoint store) now use `tomiokasan`.
+
+Smoke validation: `.venv/bin/python -m research_hybrid.smoke_test` (9/9 PASS)
+and `PP_SMOKE=1 .venv/bin/python -c "from research_hybrid.train import run; run()"`
+(stable loss ~5.73→5.71 across the curriculum switch on synthetic data).
 
 ---
 
-*Last updated 2026-08-08 — **pretraining complete (50k/50k, val 4.5870)**; v2 research track green.**
+*Last updated 2026-08-08 — **pretraining complete (50k/50k, val 4.5870)**; v2 MoE training LIVE (`tomiokasan/research-v2-70m`).**

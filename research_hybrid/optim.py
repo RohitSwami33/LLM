@@ -80,7 +80,7 @@ class MuonClip(torch.optim.Optimizer):
     """
 
     def __init__(self, model: nn.Module, cfg: TrainingConfig):
-        defaults = dict(muon_lr=cfg.lr, adamw_lr=cfg.adamw_lr,
+        defaults = dict(muon_lr=cfg.lr, adamw_lr=cfg.lr_1d,
                         weight_decay=cfg.weight_decay, momentum=cfg.muon_momentum,
                         nesterov=cfg.muon_nesterov, ns_steps=cfg.muon_ns_steps,
                         betas=cfg.adam_betas, eps=cfg.adam_eps)
@@ -119,7 +119,11 @@ class MuonClip(torch.optim.Optimizer):
             buf = self.momentum_bufs[name]
             buf.mul_(momentum).add_(g.float())
             update = g.float().lerp(buf, momentum) if nesterov else buf
-            o = zeropower_via_newtonschulz(update, ns_steps)
+            # Muon is scale-invariant only after unit normalization: NS(x) has the
+            # fixed point x @ x^T ~= I, but x @ x^T @ x grows with ||x||, so a
+            # non-unit update diverges across the 5 NS iterations (seen as 1e10x
+            # parameter blowups). Normalize first, per K2 Algorithm 1 (G_Normalize).
+            o = zeropower_via_newtonschulz(update / (update.norm() + 1e-8), ns_steps)
             o.mul_(0.2 * max(p.shape[0], p.shape[1]) ** 0.5)
             p.mul_(1.0 - muon_lr * wd)
             p.add_(o.to(p.dtype), alpha=-muon_lr)
@@ -150,7 +154,9 @@ class MuonClip(torch.optim.Optimizer):
             if mod.max_logits is None:
                 continue
             smax = mod.max_logits  # (n_q_heads,)
-            gamma = torch.clamp(tau / smax, max=1.0)  # per q-head gamma
+            # clamp_min guards against all-negative score blocks (gamma would be
+            # negative -> NaN sqrt); a non-positive S_max needs no clipping.
+            gamma = (tau / smax.clamp_min(1e-8)).clamp(max=1.0)  # per q-head gamma
             sq = gamma.sqrt()
             wq = mod.wq.weight.view(mod.n_q_heads, -1)
             wq.mul_(sq[:, None].to(wq.dtype))

@@ -78,6 +78,7 @@ class ModelConfig:
     use_ema: bool = True
     ema_decay: float = 0.999
     qk_clip_tau: Optional[float] = None
+    loss_chunk: int = 512
 
     def __post_init__(self) -> None:
         if self.n_q_heads * self.head_dim != self.d_model:

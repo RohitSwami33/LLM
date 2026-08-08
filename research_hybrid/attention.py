@@ -25,6 +25,7 @@ from typing import Callable, Optional, Tuple
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.checkpoint import checkpoint
 
 from research_hybrid.config import AttentionConfig, YaRNConfig
 
@@ -123,6 +124,23 @@ def _flex_capable(device: torch.device) -> bool:
     return False
 
 
+def _max_sub(qc: torch.Tensor, kc_sub: torch.Tensor, mask_sub: torch.Tensor,
+             scale: float) -> torch.Tensor:
+    """Sub-block pass-1: per-row max of the (masked, scaled) scores."""
+    s = torch.matmul(qc, kc_sub.transpose(-2, -1)) * scale
+    s = s.masked_fill(~mask_sub, float("-inf"))
+    return s.amax(dim=-1, keepdim=True).to(torch.float32)
+
+
+def _exp_sub(qc: torch.Tensor, kc_sub: torch.Tensor, vc_sub: torch.Tensor,
+             mask_sub: torch.Tensor, m: torch.Tensor, scale: float):
+    """Sub-block pass-2: (num = exp(s - m) @ v, den = sum(exp(s - m)))."""
+    s = torch.matmul(qc, kc_sub.transpose(-2, -1)) * scale
+    s = s.masked_fill(~mask_sub, float("-inf"))
+    e = torch.exp(s.to(torch.float32) - m)
+    return e @ vc_sub.to(torch.float32), e.sum(dim=-1, keepdim=True)
+
+
 def _kv_slice(q0: int, qe: int, tk: int, cfg: AttentionConfig) -> Optional[torch.Tensor]:
     """KV index set allowed by the static mask for query positions in [q0, qe).
 
@@ -214,8 +232,46 @@ class ChunkedSparseAttention:
             factor = H // kc.shape[1]
             kc = kc.repeat_interleave(factor, dim=1)
             vc = vc.repeat_interleave(factor, dim=1)
-        out = F.scaled_dot_product_attention(qc, kc, vc, attn_mask=causal_mask.unsqueeze(0).unsqueeze(0))
-        return out
+        # Two-pass sub-blocked softmax (flash-style), each sub-block gradient-
+        # checkpointed. Rationale (sm75/T4):
+        #  - A monolithic scores tensor (B,H,C,Lk) = 2.25 GB at B=8 x 8K and a
+        #    monolithic exp (autocast blacklists it -> fp32) = 4.5 GB blow up VRAM.
+        #  - Pass 1 computes the exact per-row max m; pass 2 accumulates exp*V and
+        #    the denominator. Peak per sub-block: scores fp16 + exp fp32 ~ 900 MB.
+        #  - The sub-block checkpoints also bound the BACKWARD recompute: when a
+        #    block-level checkpoint re-runs this function, the raw exp outputs
+        #    would otherwise stay saved (4 chunks x 8 sub-blocks x 576 MB ~ 18 GB);
+        #    per-sub-block checkpoints leave only ~1 GB live at any time.
+        scale = hd ** -0.5
+        Lk = kc.shape[2]
+        SUB = 1024
+        mask = causal_mask.unsqueeze(0).unsqueeze(0)  # (1,1,C,Lk)
+        use_ckpt = qc.requires_grad
+
+        # Pass 1: exact per-row max (keeps fp32 precision for the reduction)
+        m = torch.full((B, H, C, 1), float("-inf"), dtype=torch.float32, device=qc.device)
+        for j0 in range(0, Lk, SUB):
+            j1 = min(j0 + SUB, Lk)
+            m_sub = _max_sub(qc, kc[:, :, j0:j1], mask[:, :, :, j0:j1], scale)
+            if use_ckpt:
+                m_sub = checkpoint(_max_sub, qc, kc[:, :, j0:j1],
+                                   mask[:, :, :, j0:j1], scale, use_reentrant=False)
+            m = torch.maximum(m, m_sub)
+
+        # Pass 2: accumulate exp*V and denominator
+        num = torch.zeros(B, H, C, hd, dtype=torch.float32, device=qc.device)
+        den = torch.zeros(B, H, C, 1, dtype=torch.float32, device=qc.device)
+        for j0 in range(0, Lk, SUB):
+            j1 = min(j0 + SUB, Lk)
+            num_sub, den_sub = _exp_sub(qc, kc[:, :, j0:j1], vc[:, :, j0:j1],
+                                        mask[:, :, :, j0:j1], m, scale)
+            if use_ckpt:
+                num_sub, den_sub = checkpoint(
+                    _exp_sub, qc, kc[:, :, j0:j1], vc[:, :, j0:j1],
+                    mask[:, :, :, j0:j1], m, scale, use_reentrant=False)
+            num = num + num_sub
+            den = den + den_sub
+        return (num / den).to(qc.dtype)
 
     def _allowed(self, idx: torch.Tensor, q: torch.Tensor, c: int) -> torch.Tensor:
         """Static-mask equivalent over the chunk: returns (C, Lk) bool.
@@ -256,24 +312,28 @@ class ChunkedSparseAttention:
         """Per-head max of the (scaled) allowed logits: S_max^h = max_{B,i,j} q_i·k_j/√d.
 
         Used by MuonClip's QK-Clip (arXiv:2507.20534, Algorithm 1, step 2).
+        Computed under no_grad: the score tensors of every chunk would otherwise
+        stay in the autograd graph (held by the per-head max reduction) and
+        dominate VRAM (e.g. ~9.6 GB fp16 at B=8 x 8K).
         """
         B, H, T, hd = q.shape
         C = self.cfg.chunk_size
-        smax = None
-        for q0 in range(0, T, C):
-            qe = min(q0 + C, T)
-            c = qe - q0
-            idx = index_fn(q0, qe)
-            if idx is None or len(idx) == 0:
-                continue
-            kc = k[:, :, idx]
-            if kc.shape[1] != H:  # GQA: broadcast KV heads to the query head count
-                kc = kc.repeat_interleave(H // kc.shape[1], dim=1)
-            scores = torch.matmul(q[:, :, q0:qe], kc.transpose(-2, -1)) * scale
-            qq = q0 + torch.arange(c, device=q.device)
-            scores = scores.masked_fill(~self._allowed(idx, qq, c), float("-inf"))
-            cur = scores.amax(dim=(0, 2, 3))
-            smax = cur if smax is None else torch.maximum(smax, cur)
+        with torch.no_grad():
+            smax = None
+            for q0 in range(0, T, C):
+                qe = min(q0 + C, T)
+                c = qe - q0
+                idx = index_fn(q0, qe)
+                if idx is None or len(idx) == 0:
+                    continue
+                kc = k[:, :, idx]
+                if kc.shape[1] != H:  # GQA: broadcast KV heads to the query head count
+                    kc = kc.repeat_interleave(H // kc.shape[1], dim=1)
+                scores = torch.matmul(q[:, :, q0:qe], kc.transpose(-2, -1)) * scale
+                qq = q0 + torch.arange(c, device=q.device)
+                scores = scores.masked_fill(~self._allowed(idx, qq, c), float("-inf"))
+                cur = scores.amax(dim=(0, 2, 3))
+                smax = cur if smax is None else torch.maximum(smax, cur)
         return smax
 
 
@@ -358,7 +418,16 @@ class CausalGQA(nn.Module):
             attn_mask = self._decode_mask(Tk, x.device, x.dtype)
             out = F.scaled_dot_product_attention(q, k, v, attn_mask=attn_mask)
         elif self.cfg.pattern == "causal" and self.cfg.kernel in ("auto", "sdpa"):
-            if x.is_cuda or _flex_capable(x.device):
+            if k.shape[1] != q.shape[1]:  # GQA: CUDA sdpa requires equal head counts
+                factor = q.shape[1] // k.shape[1]
+                k = k.repeat_interleave(factor, dim=1)
+                v = v.repeat_interleave(factor, dim=1)
+            # Fused SDPA only where a real fused backend exists: flash needs sm80+
+            # (T4/sm75 falls to the math backend, which retains (B, H, T, T) fp16
+            # scores ~9.7 GB at B=8 x 8K). Everywhere else use the chunked path.
+            fused = x.device.type == "mps" or (
+                x.is_cuda and torch.cuda.get_device_capability(x.device)[0] >= 8)
+            if fused:
                 out = F.scaled_dot_product_attention(q, k, v, is_causal=True)
             else:
                 out = self._chunked(q, k, v, Tk)

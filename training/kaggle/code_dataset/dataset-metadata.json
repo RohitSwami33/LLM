@@ -1,0 +1,7 @@
+{
+  "id": "tomiokasan/research-moe-code",
+  "title": "research-moe-code",
+  "subtitle": "Hybrid-MoE-70M v2 research_hybrid package source",
+  "description": "Python package for the research-v2-70m training kernel: config, model, optim (MuonClip), train, attention, moe, mamba2, mhc, mla, smoke_test, audit.",
+  "licenses": [{"name": "other"}]
+}

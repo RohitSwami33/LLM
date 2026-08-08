@@ -226,13 +226,13 @@ def test_decode_vs_full():
     with torch.no_grad():
         full = model(seq).logits[:, -1]
         kvs = [None] * cfg.n_layers
-        h = model.embed(seq[:, :-1]) * model.input_scale
+        h = model.embed(seq[:, :-1])  # input_scale is baked into embed.weight
         cos, sin = precompute_rope(T - 1, 16, 1e6)
         for i, blk in enumerate(model.blocks):
             h, kv, _ = blk(h, cos, sin, past_kv=None, use_cache=True, training=False)
             kvs[i] = kv
         tok = seq[:, -1:]
-        h1 = model.embed(tok) * model.input_scale
+        h1 = model.embed(tok)
         cos2, sin2 = precompute_rope(T, 16, 1e6)
         for i, blk in enumerate(model.blocks):
             h1, kv, _ = blk(h1, cos2, sin2, past_kv=kvs[i], use_cache=True, training=False)

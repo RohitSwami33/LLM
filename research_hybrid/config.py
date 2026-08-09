@@ -126,10 +126,14 @@ class CurriculumStage:
 @dataclass
 class TrainingConfig:
     optimizer: Literal["muon_clip", "adamw"] = "muon_clip"
-    lr: float = 0.02
-    lr_1d: float = 0.01
+    # MuonClip lr reduced from the K2-scaled 0.02 after the first live run
+    # showed a sustained train-loss rise (7.65 -> 8.19, acc 9.5% -> 8.9%)
+    # at near-peak lr on the 139M model (steps 625-900); 0.014 + a longer
+    # warmup keeps the MuonClip character at a safer heat for this scale.
+    lr: float = 0.014
+    lr_1d: float = 0.007
     lr_min: float = 3.0e-5
-    warmup_steps: int = 375
+    warmup_steps: int = 600
     total_steps: int = 4870
     weight_decay: float = 0.1
     muon_momentum: float = 0.95

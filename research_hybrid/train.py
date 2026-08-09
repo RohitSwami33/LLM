@@ -138,11 +138,13 @@ def chunked_accuracy(model: HybridLM, h: torch.Tensor, labels: torch.Tensor,
 def evaluate(model: HybridLM, data: TokenMemmap, device, ema: Optional[EMAWrapper],
              T: int = 8192, B: int = 4, max_blocks: int = 50, pattern: str = "block_sparse",
              window: int = 8192, anchor: int = 128) -> Dict[str, float]:
-    """Val loss / PPL / next-token accuracy over contiguous val blocks (uses EMA)."""
-    saved = None
-    if ema is not None:
-        saved = {n: p.detach().clone() for n, p in model.named_parameters() if p.requires_grad}
-        ema.apply_to(model)
+    """Val loss / PPL / next-token accuracy over contiguous val blocks.
+
+    Evaluated with the LIVE weights: with decay 0.999 the EMA shadow has a
+    ~1000-step memory, so during the first ~2000 steps of a 4,870-step run the
+    EMA is dominated by the random init (measured: val loss inflated 7.7 -> 19.5
+    at step 500). ``ema`` is kept in the signature for API compatibility only.
+    """
     model.eval()
     total_loss, total_tok, correct, blocks = 0.0, 0, 0, 0
     try:
@@ -160,10 +162,6 @@ def evaluate(model: HybridLM, data: TokenMemmap, device, ema: Optional[EMAWrappe
                 break
     finally:
         model.train()
-        if saved is not None:
-            for n, p in model.named_parameters():
-                if n in saved:
-                    p.copy_(saved[n])
     if total_tok == 0:
         return {"val_loss": float("inf"), "val_perplexity": float("inf"), "val_accuracy": 0.0}
     avg = total_loss / total_tok
@@ -263,6 +261,28 @@ KAGGLE_AVAILABLE = False
 upload_queue = queue.Queue()
 
 
+def _patch_upload_file_name():
+    """kaggle 2.2.4's _upload_file never sets UploadFile.description (the
+    dataset-side file name); the server then rejects dataset creation with
+    "Dataset url's dataset slugs and hashlink are all null". Set it to the
+    local file name (same monkeypatch as tools/push_code_dataset.py)."""
+    try:
+        from kaggle.api import kaggle_api_extended as K
+        orig = K.KaggleApi._upload_file
+
+        def patched(self, file_name, full_path, blob_type, upload_context, quiet,
+                    resources, content_type=None):
+            uf = orig(self, file_name, full_path, blob_type, upload_context, quiet,
+                      resources, content_type)
+            if uf is not None and not getattr(uf, "description", None):
+                uf.description = file_name
+            return uf
+
+        K.KaggleApi._upload_file = patched
+    except Exception:
+        pass
+
+
 def _ensure_kaggle():
     global _KAGGLE_API, KAGGLE_AVAILABLE
     if KAGGLE_AVAILABLE:
@@ -271,6 +291,7 @@ def _ensure_kaggle():
         return False
     try:
         from kaggle.api.kaggle_api_extended import KaggleApi
+        _patch_upload_file_name()
         api = KaggleApi()
         api.authenticate()
         _KAGGLE_API = api
@@ -334,9 +355,19 @@ def _upload_worker() -> None:
             for attempt in range(1, 4):
                 try:
                     t0 = time.time()
-                    _KAGGLE_API.dataset_create_version(
-                        str(stage), version_notes=f"step {stage.name.split('_')[-1]}",
-                        quiet=True, convert_to_csv=False, delete_old_versions=True)
+                    # The dataset may not exist yet (first save): dataset_create_version
+                    # 403s on a non-existent slug, so create it first and fall back to
+                    # versioning when it already exists ("already in use" error).
+                    r = _KAGGLE_API.dataset_create_new(
+                        str(stage), quiet=True, dir_mode="skip", convert_to_csv=False)
+                    err = getattr(r, "error", None)
+                    if err and "already in use" in err:
+                        r = _KAGGLE_API.dataset_create_version(
+                            str(stage), version_notes=f"step {stage.name.split('_')[-1]}",
+                            quiet=True, convert_to_csv=False, delete_old_versions=True)
+                        err = getattr(r, "error", None)
+                    if err:
+                        raise RuntimeError(err)
                     print(f"  [upload] {stage.name} pushed in {time.time()-t0:.0f}s")
                     break
                 except Exception as e:
@@ -451,11 +482,12 @@ def run(model_cfg: Optional[ModelConfig] = None, train_cfg: Optional[TrainingCon
     model.train()
     train_start = time.time()
     step_loss, step_acc_num, step_acc_den = 0.0, 0.0, 0.0
+    step_bal, step_z = 0.0, 0.0
     csv_path = log_dir_p / "train_log.csv"
     csv_file = open(csv_path, "w", newline="")
     csv_writer = csv.writer(csv_file)
     csv_writer.writerow(["step", "loss", "accuracy", "lr", "tokens", "tok_per_sec",
-                         "gpu_mb", "ctx", "note"])
+                         "gpu_mb", "ctx", "balance", "z", "note"])
 
     while global_step < tc.total_steps:
         stage = tc.stage_for_step(global_step)
@@ -489,6 +521,8 @@ def run(model_cfg: Optional[ModelConfig] = None, train_cfg: Optional[TrainingCon
             ema.update(model)
         global_step += 1
         step_loss += loss.item()
+        step_bal += out.aux.get("balance", torch.zeros(()).to(loss.device)).item()
+        step_z += out.aux.get("z", torch.zeros(()).to(loss.device)).item()
 
         with torch.no_grad():
             c, t = chunked_accuracy(model, out.hidden, x, chunk=1024)
@@ -503,12 +537,15 @@ def run(model_cfg: Optional[ModelConfig] = None, train_cfg: Optional[TrainingCon
             tok_s = (total_tokens - resumed_tokens) / max(elapsed, 1)
             gpu_mem = torch.cuda.memory_allocated() / 1e6 if torch.cuda.is_available() else 0
             print(f"  Step {global_step:>6d} | tok {total_tokens/1e6:>8.1f}M | loss: {avg_loss:.4f} "
-                  f"| acc: {acc:.4f} | lr: {lr_now:.2e} | tok/s: {tok_s:.0f} | gpu: {gpu_mem:.0f}MB "
+                  f"| acc: {acc:.4f} | lr: {lr_now:.2e} | bal: {step_bal/log_every:.3f} "
+                  f"| z: {step_z/log_every:.3f} | tok/s: {tok_s:.0f} | gpu: {gpu_mem:.0f}MB "
                   f"| ctx {T} {stage.attention_pattern}")
             csv_writer.writerow([global_step, f"{avg_loss:.6f}", f"{acc:.6f}", f"{lr_now:.8f}",
-                                 total_tokens, f"{tok_s:.1f}", f"{gpu_mem:.1f}", T, ""])
+                                 total_tokens, f"{tok_s:.1f}", f"{gpu_mem:.1f}", T,
+                                 f"{step_bal/log_every:.6f}", f"{step_z/log_every:.6f}", ""])
             csv_file.flush()
             step_loss, step_acc_num, step_acc_den = 0.0, 0.0, 0.0
+            step_bal, step_z = 0.0, 0.0
 
         if global_step % save_every == 0:
             path = str(ckpt_dir / f"step_{global_step}.pt")

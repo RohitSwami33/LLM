@@ -18,8 +18,6 @@ Notes:
 from __future__ import annotations
 
 import json
-import os
-import py_compile
 import shutil
 import sys
 import tempfile
@@ -58,8 +56,8 @@ def main():
     # kernel (they would kill the whole 12h session at boot).
     for f in sorted(tmp.glob("*.py")):
         try:
-            py_compile.compile(str(f), doraise=True, cfile=os.devnull)
-        except py_compile.PyCompileError:
+            compile(f.read_text(encoding="utf-8"), str(f), "exec")
+        except SyntaxError:
             sys.stderr.write(f"SYNTAX ERROR in {f.name}\n")
             raise
     with open(tmp / "dataset-metadata.json", "w") as fh:

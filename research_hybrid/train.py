@@ -35,11 +35,11 @@ from research_hybrid.model import EMAWrapper, HybridLM
 from research_hybrid.optim import make_optimizer
 
 # Checkpoint store: PP_CHECKPOINT_DATASET overrides for cross-account runs;
-    # falls back to the kernel's owner env (platform sets it for the session) or
-    # the default account.
-    CHECKPOINT_DATASET = os.environ.get(
-        "PP_CHECKPOINT_DATASET",
-        f"{(os.environ.get('PP_OWNER') or os.environ.get('KAGGLE_USERNAME') or 'tomiokasan')}/research-moe-checkpoints")
+# falls back to the kernel's owner env (platform sets it for the session) or
+# the default account.
+CHECKPOINT_DATASET = os.environ.get(
+    "PP_CHECKPOINT_DATASET",
+    f"{(os.environ.get('PP_OWNER') or os.environ.get('KAGGLE_USERNAME') or 'tomiokasan')}/research-moe-checkpoints")
 
 
 class TokenMemmap:

@@ -18,7 +18,10 @@ Notes:
 from __future__ import annotations
 
 import json
+import os
+import py_compile
 import shutil
+import sys
 import tempfile
 from pathlib import Path
 
@@ -51,6 +54,14 @@ def main():
     tmp = Path(tempfile.mkdtemp(prefix="rhmoe_code_"))
     for f in sorted((REPO / "research_hybrid").glob("*.py")):
         shutil.copyfile(f, tmp / f.name)
+    # Byte-compile every package file so syntax errors can never reach the
+    # kernel (they would kill the whole 12h session at boot).
+    for f in sorted(tmp.glob("*.py")):
+        try:
+            py_compile.compile(str(f), doraise=True, cfile=os.devnull)
+        except py_compile.PyCompileError:
+            sys.stderr.write(f"SYNTAX ERROR in {f.name}\n")
+            raise
     with open(tmp / "dataset-metadata.json", "w") as fh:
         json.dump({
             "id": DATASET_ID,

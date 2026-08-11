@@ -34,7 +34,12 @@ from research_hybrid.config import CurriculumStage, ModelConfig, TrainingConfig
 from research_hybrid.model import EMAWrapper, HybridLM
 from research_hybrid.optim import make_optimizer
 
-CHECKPOINT_DATASET = "tomiokasan/research-moe-checkpoints"
+# Checkpoint store: PP_CHECKPOINT_DATASET overrides for cross-account runs;
+    # falls back to the kernel's owner env (platform sets it for the session) or
+    # the default account.
+    CHECKPOINT_DATASET = os.environ.get(
+        "PP_CHECKPOINT_DATASET",
+        f"{(os.environ.get('PP_OWNER') or os.environ.get('KAGGLE_USERNAME') or 'tomiokasan')}/research-moe-checkpoints")
 
 
 class TokenMemmap:
@@ -469,7 +474,10 @@ def run(model_cfg: Optional[ModelConfig] = None, train_cfg: Optional[TrainingCon
             continue
     resumed_tokens = total_tokens
 
-    save_every = int(os.environ.get("PP_SAVE_EVERY", "500"))
+    # A Kaggle session dies at the 12h wall (~940 steps at stage-A speed), so
+    # save_every must be small enough that every session lands at least one
+    # checkpoint (next multiple of save_every < 940); 200 keeps >200-step headroom.
+    save_every = int(os.environ.get("PP_SAVE_EVERY", "200"))
     eval_every = int(os.environ.get("PP_EVAL_EVERY", "500"))
     log_every = int(os.environ.get("PP_LOG_EVERY", "25"))
     grad_clip = tc.grad_clip

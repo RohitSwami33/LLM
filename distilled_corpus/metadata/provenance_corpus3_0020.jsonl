@@ -1,0 +1,2 @@
+{"id": "corpus3-000081", "seed_id": "seed-00317", "prompt_concept": "transformer architectures", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1263, "elapsed": 54.322, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000084", "seed_id": "seed-00180", "prompt_concept": "dark matter", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 873, "elapsed": 22.904, "cached": false, "error": null, "ensemble": false}

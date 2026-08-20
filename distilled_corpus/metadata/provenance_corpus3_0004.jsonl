@@ -1,0 +1,4 @@
+{"id": "corpus3-000014", "seed_id": "seed-00383", "prompt_concept": "communication", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 4791, "elapsed": 233.307, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000015", "seed_id": "seed-00296", "prompt_concept": "neural networks", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3267, "elapsed": 179.047, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000016", "seed_id": "seed-00092", "prompt_concept": "atomic structure", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 2283, "elapsed": 74.908, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000017", "seed_id": "seed-00061", "prompt_concept": "rotational motion", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1757, "elapsed": 68.811, "cached": false, "error": null, "ensemble": false}

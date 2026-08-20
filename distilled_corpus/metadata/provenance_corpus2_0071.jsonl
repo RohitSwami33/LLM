@@ -1,0 +1,4 @@
+{"id": "corpus2-000280", "seed_id": "seed-00179", "prompt_concept": "cosmic microwave background", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3045, "elapsed": 68.726, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000281", "seed_id": "seed-00165", "prompt_concept": "El Nino", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1988, "elapsed": 80.839, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000282", "seed_id": "seed-00131", "prompt_concept": "linkage and recombination", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4437, "elapsed": 133.823, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000283", "seed_id": "seed-00042", "prompt_concept": "descriptive statistics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3866, "elapsed": 131.777, "cached": false, "error": null, "ensemble": true}

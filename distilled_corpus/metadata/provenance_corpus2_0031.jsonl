@@ -1,0 +1,4 @@
+{"id": "corpus2-000120", "seed_id": "seed-00082", "prompt_concept": "Lorentz transformations", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 150.714, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000121", "seed_id": "seed-00050", "prompt_concept": "combinatorics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2358, "elapsed": 40.737, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000122", "seed_id": "seed-00047", "prompt_concept": "Bayesian inference", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2024, "elapsed": 62.56, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000123", "seed_id": "seed-00312", "prompt_concept": "image segmentation", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3224, "elapsed": 67.672, "cached": false, "error": null, "ensemble": false}

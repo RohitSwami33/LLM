@@ -1,0 +1,3 @@
+{"id": "gen-000012", "seed_id": "seed-00331", "prompt_concept": "ancient civilizations", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 521, "elapsed": 16.518, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000013", "seed_id": "seed-00067", "prompt_concept": "Boltzmann distribution", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 228, "elapsed": 7.798, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000014", "seed_id": "seed-00014", "prompt_concept": "circles", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 2568, "elapsed": 68.097, "cached": false, "error": null, "ensemble": false}

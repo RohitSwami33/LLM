@@ -1,0 +1,4 @@
+{"id": "corpus2-000116", "seed_id": "seed-00224", "prompt_concept": "divide and conquer", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2336, "elapsed": 100.403, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000117", "seed_id": "seed-00322", "prompt_concept": "attention mechanisms", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1712, "elapsed": 133.474, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000118", "seed_id": "seed-00132", "prompt_concept": "mutations", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2263, "elapsed": 46.057, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000119", "seed_id": "seed-00231", "prompt_concept": "hash tables", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2459, "elapsed": 112.071, "cached": false, "error": null, "ensemble": false}

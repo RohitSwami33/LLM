@@ -1,0 +1,4 @@
+{"id": "corpus2-000152", "seed_id": "seed-00191", "prompt_concept": "thermodynamic cycles", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3689, "elapsed": 104.039, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000153", "seed_id": "seed-00373", "prompt_concept": "intellectual property", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3363, "elapsed": 63.287, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000154", "seed_id": "seed-00141", "prompt_concept": "biodiversity", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3430, "elapsed": 100.251, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000155", "seed_id": "seed-00139", "prompt_concept": "nutrient cycles", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3489, "elapsed": 72.891, "cached": false, "error": null, "ensemble": false}

@@ -1,0 +1,2 @@
+{"id": "corpus3-000077", "seed_id": "seed-00128", "prompt_concept": "PCR", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 9002, "elapsed": 288.952, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000079", "seed_id": "seed-00062", "prompt_concept": "oscillations", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3069, "elapsed": 68.0, "cached": false, "error": null, "ensemble": false}

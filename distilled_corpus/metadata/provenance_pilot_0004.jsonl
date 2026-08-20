@@ -1,0 +1,3 @@
+{"id": "gen-000009", "seed_id": "seed-00216", "prompt_concept": "recursion", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 363, "elapsed": 10.044, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000010", "seed_id": "seed-00200", "prompt_concept": "process control", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 895, "elapsed": 18.822, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000011", "seed_id": "seed-00043", "prompt_concept": "hypothesis testing", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 2696, "elapsed": 64.351, "cached": false, "error": null, "ensemble": false}

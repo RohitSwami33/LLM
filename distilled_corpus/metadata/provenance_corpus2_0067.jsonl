@@ -1,0 +1,4 @@
+{"id": "corpus2-000264", "seed_id": "seed-00272", "prompt_concept": "code generation", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 497, "elapsed": 14.39, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000265", "seed_id": "seed-00145", "prompt_concept": "fermentation", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1800, "elapsed": 57.911, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000266", "seed_id": "seed-00098", "prompt_concept": "functional groups", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2332, "elapsed": 60.929, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000267", "seed_id": "seed-00052", "prompt_concept": "recurrence relations", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2877, "elapsed": 75.69, "cached": false, "error": null, "ensemble": false}

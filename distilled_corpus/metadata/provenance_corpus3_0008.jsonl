@@ -1,0 +1,4 @@
+{"id": "corpus3-000030", "seed_id": "seed-00283", "prompt_concept": "load balancing", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 4994, "elapsed": 184.908, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000031", "seed_id": "seed-00110", "prompt_concept": "proteins", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 2684, "elapsed": 141.696, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000032", "seed_id": "seed-00338", "prompt_concept": "decolonization", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 2090, "elapsed": 108.589, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000033", "seed_id": "seed-00144", "prompt_concept": "antibiotics", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3522, "elapsed": 90.625, "cached": false, "error": null, "ensemble": false}

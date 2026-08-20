@@ -1,0 +1,4 @@
+{"id": "corpus2-000000", "seed_id": "seed-00162", "prompt_concept": "volcanism", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2641, "elapsed": 73.308, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000001", "seed_id": "seed-00127", "prompt_concept": "translation", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2216, "elapsed": 65.772, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000002", "seed_id": "seed-00230", "prompt_concept": "trees", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 161.738, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000003", "seed_id": "seed-00016", "prompt_concept": "coordinate geometry", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5110, "elapsed": 105.84, "cached": false, "error": null, "ensemble": false}

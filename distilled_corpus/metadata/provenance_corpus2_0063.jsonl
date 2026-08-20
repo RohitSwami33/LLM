@@ -1,0 +1,4 @@
+{"id": "corpus2-000248", "seed_id": "seed-00056", "prompt_concept": "Fermat's little theorem", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1863, "elapsed": 51.329, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000249", "seed_id": "seed-00100", "prompt_concept": "reaction mechanisms", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5092, "elapsed": 136.648, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000250", "seed_id": "seed-00129", "prompt_concept": "gene regulation", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 832, "elapsed": 31.249, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000251", "seed_id": "seed-00192", "prompt_concept": "heat transfer", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1175, "elapsed": 31.989, "cached": false, "error": null, "ensemble": false}

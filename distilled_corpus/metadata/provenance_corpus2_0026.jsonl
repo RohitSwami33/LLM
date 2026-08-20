@@ -1,0 +1,4 @@
+{"id": "corpus2-000100", "seed_id": "seed-00351", "prompt_concept": "GDP", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2070, "elapsed": 38.957, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000101", "seed_id": "seed-00008", "prompt_concept": "polynomials", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5783, "elapsed": 169.845, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000102", "seed_id": "seed-00202", "prompt_concept": "PID control", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1752, "elapsed": 33.017, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000103", "seed_id": "seed-00189", "prompt_concept": "dynamics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1623, "elapsed": 25.336, "cached": false, "error": null, "ensemble": false}

@@ -1,0 +1,4 @@
+{"id": "corpus2-000064", "seed_id": "seed-00285", "prompt_concept": "message queues", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1687, "elapsed": 36.548, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000065", "seed_id": "seed-00209", "prompt_concept": "crystal defects", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1440, "elapsed": 41.286, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000066", "seed_id": "seed-00266", "prompt_concept": "PKI", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1436, "elapsed": 43.442, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000067", "seed_id": "seed-00320", "prompt_concept": "RLHF", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 874, "elapsed": 18.83, "cached": false, "error": null, "ensemble": false}

@@ -1,0 +1,3 @@
+{"id": "corpus2-000204", "seed_id": "seed-00068", "prompt_concept": "Coulomb's law", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1112, "elapsed": 20.664, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000205", "seed_id": "seed-00201", "prompt_concept": "feedback", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1618, "elapsed": 67.668, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000207", "seed_id": "seed-00188", "prompt_concept": "statics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 133.927, "cached": false, "error": null, "ensemble": false}

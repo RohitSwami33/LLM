@@ -1,0 +1,4 @@
+{"id": "corpus2-000284", "seed_id": "seed-00212", "prompt_concept": "failure analysis", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 663, "elapsed": 31.73, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000285", "seed_id": "seed-00161", "prompt_concept": "earthquakes", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1420, "elapsed": 47.261, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000286", "seed_id": "seed-00369", "prompt_concept": "narrative structure", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2883, "elapsed": 82.154, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000287", "seed_id": "seed-00127", "prompt_concept": "translation", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2599, "elapsed": 45.358, "cached": false, "error": null, "ensemble": false}

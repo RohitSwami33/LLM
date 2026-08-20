@@ -1,0 +1,4 @@
+{"id": "corpus2-000184", "seed_id": "seed-00301", "prompt_concept": "transformers", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 120.511, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000185", "seed_id": "seed-00362", "prompt_concept": "ethics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3070, "elapsed": 82.644, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000186", "seed_id": "seed-00219", "prompt_concept": "functional programming", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4100, "elapsed": 99.992, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000187", "seed_id": "seed-00313", "prompt_concept": "tokenization", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4987, "elapsed": 123.01, "cached": false, "error": null, "ensemble": false}

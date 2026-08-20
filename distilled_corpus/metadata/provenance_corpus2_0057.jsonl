@@ -1,0 +1,4 @@
+{"id": "corpus2-000224", "seed_id": "seed-00268", "prompt_concept": "lexing", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3733, "elapsed": 90.444, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000225", "seed_id": "seed-00039", "prompt_concept": "expectation and variance", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3801, "elapsed": 122.073, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000226", "seed_id": "seed-00208", "prompt_concept": "motion planning", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2375, "elapsed": 48.869, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000227", "seed_id": "seed-00115", "prompt_concept": "polymers", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 113.754, "cached": false, "error": null, "ensemble": false}

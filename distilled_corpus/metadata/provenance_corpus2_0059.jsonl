@@ -1,0 +1,4 @@
+{"id": "corpus2-000232", "seed_id": "seed-00081", "prompt_concept": "special relativity", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2941, "elapsed": 58.996, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000233", "seed_id": "seed-00380", "prompt_concept": "personal finance", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6656, "elapsed": 161.896, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000234", "seed_id": "seed-00139", "prompt_concept": "nutrient cycles", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2120, "elapsed": 44.195, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000235", "seed_id": "seed-00012", "prompt_concept": "Euclidean geometry", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4904, "elapsed": 120.489, "cached": false, "error": null, "ensemble": false}

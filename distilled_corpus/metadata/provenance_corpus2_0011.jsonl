@@ -1,0 +1,4 @@
+{"id": "corpus2-000040", "seed_id": "seed-00112", "prompt_concept": "metabolism", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3406, "elapsed": 81.216, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000041", "seed_id": "seed-00176", "prompt_concept": "exoplanets", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 122.761, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000042", "seed_id": "seed-00226", "prompt_concept": "complexity analysis", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1665, "elapsed": 38.259, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000043", "seed_id": "seed-00235", "prompt_concept": "SQL", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 126.994, "cached": false, "error": null, "ensemble": false}

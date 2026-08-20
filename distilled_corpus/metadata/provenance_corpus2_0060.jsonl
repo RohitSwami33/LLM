@@ -1,0 +1,4 @@
+{"id": "corpus2-000236", "seed_id": "seed-00362", "prompt_concept": "ethics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1153, "elapsed": 22.058, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000237", "seed_id": "seed-00085", "prompt_concept": "ensembles", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2087, "elapsed": 96.319, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000238", "seed_id": "seed-00002", "prompt_concept": "fractions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1068, "elapsed": 23.572, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000239", "seed_id": "seed-00109", "prompt_concept": "electrochemistry", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3105, "elapsed": 68.184, "cached": false, "error": null, "ensemble": false}

@@ -1,0 +1,4 @@
+{"id": "corpus2-000132", "seed_id": "seed-00125", "prompt_concept": "central dogma", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3636, "elapsed": 62.032, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000133", "seed_id": "seed-00203", "prompt_concept": "stability", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2981, "elapsed": 59.671, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000134", "seed_id": "seed-00098", "prompt_concept": "functional groups", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3063, "elapsed": 55.532, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000135", "seed_id": "seed-00244", "prompt_concept": "file systems", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 135.322, "cached": false, "error": null, "ensemble": false}

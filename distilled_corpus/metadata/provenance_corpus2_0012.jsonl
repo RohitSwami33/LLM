@@ -1,0 +1,4 @@
+{"id": "corpus2-000044", "seed_id": "seed-00223", "prompt_concept": "greedy algorithms", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2309, "elapsed": 44.383, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000045", "seed_id": "seed-00348", "prompt_concept": "constitutions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2702, "elapsed": 55.092, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000046", "seed_id": "seed-00091", "prompt_concept": "Hertzsprung-Russell diagram", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 145.232, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000047", "seed_id": "seed-00053", "prompt_concept": "primes", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 103.248, "cached": false, "error": null, "ensemble": false}

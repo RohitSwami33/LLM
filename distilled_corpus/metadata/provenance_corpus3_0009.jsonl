@@ -1,0 +1,2 @@
+{"id": "corpus3-000034", "seed_id": "seed-00160", "prompt_concept": "rock cycle", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 6372, "elapsed": 230.099, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000037", "seed_id": "seed-00274", "prompt_concept": "pipelining", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1860, "elapsed": 90.497, "cached": false, "error": null, "ensemble": false}

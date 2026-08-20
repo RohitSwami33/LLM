@@ -1,0 +1,3 @@
+{"id": "gen-000000", "seed_id": "seed-00188", "prompt_concept": "statics", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 661, "elapsed": 16.165, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000001", "seed_id": "seed-00167", "prompt_concept": "ocean currents", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 1062, "elapsed": 24.271, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000002", "seed_id": "seed-00036", "prompt_concept": "Bayes theorem", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 2141, "elapsed": 42.304, "cached": false, "error": null, "ensemble": false}

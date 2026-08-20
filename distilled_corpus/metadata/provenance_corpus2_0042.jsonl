@@ -1,0 +1,4 @@
+{"id": "corpus2-000164", "seed_id": "seed-00217", "prompt_concept": "error handling", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3789, "elapsed": 70.296, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000165", "seed_id": "seed-00099", "prompt_concept": "isomerism", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2558, "elapsed": 68.893, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000166", "seed_id": "seed-00180", "prompt_concept": "dark matter", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2445, "elapsed": 44.028, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000167", "seed_id": "seed-00317", "prompt_concept": "transformer architectures", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3948, "elapsed": 91.318, "cached": false, "error": null, "ensemble": false}

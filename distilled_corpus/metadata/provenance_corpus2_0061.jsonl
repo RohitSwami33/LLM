@@ -1,0 +1,4 @@
+{"id": "corpus2-000240", "seed_id": "seed-00241", "prompt_concept": "processes and threads", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2614, "elapsed": 81.902, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000241", "seed_id": "seed-00314", "prompt_concept": "embeddings", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1303, "elapsed": 49.997, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000242", "seed_id": "seed-00308", "prompt_concept": "PPO basics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1346, "elapsed": 75.481, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000243", "seed_id": "seed-00010", "prompt_concept": "exponents and logarithms", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4458, "elapsed": 119.759, "cached": false, "error": null, "ensemble": false}

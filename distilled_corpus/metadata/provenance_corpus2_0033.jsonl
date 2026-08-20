@@ -1,0 +1,4 @@
+{"id": "corpus2-000128", "seed_id": "seed-00204", "prompt_concept": "transfer functions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2799, "elapsed": 61.806, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000129", "seed_id": "seed-00360", "prompt_concept": "demographics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 139.268, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000130", "seed_id": "seed-00048", "prompt_concept": "logic", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2986, "elapsed": 105.841, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000131", "seed_id": "seed-00044", "prompt_concept": "confidence intervals", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2503, "elapsed": 38.583, "cached": false, "error": null, "ensemble": false}

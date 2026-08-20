@@ -1,0 +1,3 @@
+{"id": "corpus3-000022", "seed_id": "seed-00345", "prompt_concept": "democracy", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 254, "elapsed": 23.777, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000024", "seed_id": "seed-00105", "prompt_concept": "crystal field theory", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1108, "elapsed": 47.988, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000025", "seed_id": "seed-00341", "prompt_concept": "mountain ranges", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 611, "elapsed": 50.718, "cached": false, "error": null, "ensemble": true}

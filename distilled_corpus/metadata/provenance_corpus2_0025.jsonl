@@ -1,0 +1,4 @@
+{"id": "corpus2-000096", "seed_id": "seed-00016", "prompt_concept": "coordinate geometry", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6192, "elapsed": 139.474, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000097", "seed_id": "seed-00111", "prompt_concept": "enzymes", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3616, "elapsed": 75.117, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000098", "seed_id": "seed-00005", "prompt_concept": "ratios and proportions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3347, "elapsed": 98.156, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000099", "seed_id": "seed-00230", "prompt_concept": "trees", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5985, "elapsed": 109.937, "cached": false, "error": null, "ensemble": false}

@@ -1,0 +1,4 @@
+{"id": "corpus3-000058", "seed_id": "seed-00074", "prompt_concept": "lenses and mirrors", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3049, "elapsed": 128.876, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000059", "seed_id": "seed-00055", "prompt_concept": "gcd and lcm", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 4360, "elapsed": 221.77, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus3-000062", "seed_id": "seed-00185", "prompt_concept": "capacitors and inductors", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 742, "elapsed": 28.914, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000063", "seed_id": "seed-00118", "prompt_concept": "crystal structures", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 998, "elapsed": 52.673, "cached": false, "error": null, "ensemble": false}

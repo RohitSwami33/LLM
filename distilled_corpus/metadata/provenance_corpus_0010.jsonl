@@ -1,0 +1,3 @@
+{"id": "gen-000027", "seed_id": "seed-00301", "prompt_concept": "transformers", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 0, "elapsed": 0.0, "cached": false, "error": "http 429", "ensemble": false}
+{"id": "gen-000028", "seed_id": "seed-00223", "prompt_concept": "greedy algorithms", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 0, "elapsed": 0.0, "cached": false, "error": "http 429", "ensemble": false}
+{"id": "gen-000029", "seed_id": "seed-00231", "prompt_concept": "hash tables", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 0, "elapsed": 0.0, "cached": false, "error": "http 429", "ensemble": false}

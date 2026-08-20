@@ -1,0 +1,4 @@
+{"id": "corpus2-000276", "seed_id": "seed-00042", "prompt_concept": "descriptive statistics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2234, "elapsed": 73.354, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000277", "seed_id": "seed-00021", "prompt_concept": "unit circle", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 106.85, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000278", "seed_id": "seed-00363", "prompt_concept": "logic", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3483, "elapsed": 91.506, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000279", "seed_id": "seed-00169", "prompt_concept": "marine ecosystems", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2092, "elapsed": 46.871, "cached": false, "error": null, "ensemble": false}

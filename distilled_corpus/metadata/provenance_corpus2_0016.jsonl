@@ -1,0 +1,4 @@
+{"id": "corpus2-000060", "seed_id": "seed-00251", "prompt_concept": "sockets", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 630, "elapsed": 17.254, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000061", "seed_id": "seed-00085", "prompt_concept": "ensembles", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4018, "elapsed": 116.234, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000062", "seed_id": "seed-00257", "prompt_concept": "virtualization", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 640, "elapsed": 39.614, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000063", "seed_id": "seed-00107", "prompt_concept": "kinetics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3087, "elapsed": 54.194, "cached": false, "error": null, "ensemble": false}

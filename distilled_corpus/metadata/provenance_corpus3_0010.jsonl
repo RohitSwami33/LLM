@@ -1,0 +1,3 @@
+{"id": "corpus3-000038", "seed_id": "seed-00287", "prompt_concept": "rate limiting", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 768, "elapsed": 25.829, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus3-000040", "seed_id": "seed-00253", "prompt_concept": "CAP theorem", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 2052, "elapsed": 58.005, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000041", "seed_id": "seed-00331", "prompt_concept": "ancient civilizations", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 8150, "elapsed": 267.134, "cached": false, "error": null, "ensemble": false}

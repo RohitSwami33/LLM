@@ -1,0 +1,4 @@
+{"id": "corpus2-000180", "seed_id": "seed-00036", "prompt_concept": "Bayes theorem", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2983, "elapsed": 307.046, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000181", "seed_id": "seed-00346", "prompt_concept": "separation of powers", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1775, "elapsed": 28.457, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000182", "seed_id": "seed-00375", "prompt_concept": "learning theories", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4383, "elapsed": 352.489, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000183", "seed_id": "seed-00160", "prompt_concept": "rock cycle", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3330, "elapsed": 79.042, "cached": false, "error": null, "ensemble": true}

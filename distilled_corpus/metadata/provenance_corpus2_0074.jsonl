@@ -1,0 +1,4 @@
+{"id": "corpus2-000292", "seed_id": "seed-00096", "prompt_concept": "states of matter", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3975, "elapsed": 98.084, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000293", "seed_id": "seed-00292", "prompt_concept": "ensembles", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3407, "elapsed": 100.338, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000294", "seed_id": "seed-00354", "prompt_concept": "trade", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 150.02, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000295", "seed_id": "seed-00230", "prompt_concept": "trees", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1481, "elapsed": 38.328, "cached": false, "error": null, "ensemble": false}

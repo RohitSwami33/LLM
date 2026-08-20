@@ -1,0 +1,4 @@
+{"id": "corpus3-000026", "seed_id": "seed-00381", "prompt_concept": "health and hygiene", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 639, "elapsed": 70.316, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000027", "seed_id": "seed-00273", "prompt_concept": "instruction sets", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 883, "elapsed": 38.866, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000028", "seed_id": "seed-00037", "prompt_concept": "random variables", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1085, "elapsed": 56.002, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus3-000029", "seed_id": "seed-00150", "prompt_concept": "neurons", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1935, "elapsed": 85.161, "cached": false, "error": null, "ensemble": false}

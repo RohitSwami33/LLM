@@ -1,0 +1,3 @@
+{"id": "corpus3-000018", "seed_id": "seed-00201", "prompt_concept": "feedback", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 8753, "elapsed": 270.723, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000020", "seed_id": "seed-00317", "prompt_concept": "transformer architectures", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3143, "elapsed": 133.116, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000021", "seed_id": "seed-00201", "prompt_concept": "feedback", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 5358, "elapsed": 230.116, "cached": false, "error": null, "ensemble": false}

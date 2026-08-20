@@ -1,0 +1,4 @@
+{"id": "corpus2-000256", "seed_id": "seed-00287", "prompt_concept": "rate limiting", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 658, "elapsed": 19.068, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000257", "seed_id": "seed-00153", "prompt_concept": "neural circuits", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1847, "elapsed": 40.961, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000258", "seed_id": "seed-00053", "prompt_concept": "primes", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1630, "elapsed": 52.452, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000259", "seed_id": "seed-00034", "prompt_concept": "SVD", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 966, "elapsed": 31.449, "cached": false, "error": null, "ensemble": false}

@@ -1,0 +1,1 @@
+{"id": "corpus3-000073", "seed_id": "seed-00232", "prompt_concept": "heaps", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1796, "elapsed": 63.997, "cached": false, "error": null, "ensemble": false}

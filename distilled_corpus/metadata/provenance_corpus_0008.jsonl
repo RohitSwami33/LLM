@@ -1,0 +1,3 @@
+{"id": "gen-000021", "seed_id": "seed-00020", "prompt_concept": "law of sines and cosines", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 0, "elapsed": 0.0, "cached": false, "error": "http 429", "ensemble": false}
+{"id": "gen-000022", "seed_id": "seed-00011", "prompt_concept": "sequences and series", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 0, "elapsed": 0.0, "cached": false, "error": "http 429", "ensemble": false}
+{"id": "gen-000023", "seed_id": "seed-00095", "prompt_concept": "stoichiometry", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 0, "elapsed": 0.0, "cached": false, "error": "http 429", "ensemble": false}

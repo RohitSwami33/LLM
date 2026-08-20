@@ -1,0 +1,3 @@
+{"id": "corpus3-000089", "seed_id": "seed-00080", "prompt_concept": "quantum numbers", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 7454, "elapsed": 193.009, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000091", "seed_id": "seed-00134", "prompt_concept": "natural selection", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 2060, "elapsed": 114.072, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus3-000092", "seed_id": "seed-00329", "prompt_concept": "ReAct", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 4477, "elapsed": 121.809, "cached": false, "error": null, "ensemble": false}

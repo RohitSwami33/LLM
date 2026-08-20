@@ -1,0 +1,4 @@
+{"id": "corpus2-000176", "seed_id": "seed-00088", "prompt_concept": "stellar evolution", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2136, "elapsed": 54.743, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000177", "seed_id": "seed-00158", "prompt_concept": "plate tectonics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5113, "elapsed": 238.703, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000178", "seed_id": "seed-00071", "prompt_concept": "Maxwell's equations", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2089, "elapsed": 265.84, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000179", "seed_id": "seed-00200", "prompt_concept": "process control", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4113, "elapsed": 250.596, "cached": false, "error": null, "ensemble": false}

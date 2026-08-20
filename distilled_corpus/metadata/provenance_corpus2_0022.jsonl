@@ -1,0 +1,4 @@
+{"id": "corpus2-000084", "seed_id": "seed-00103", "prompt_concept": "coordination compounds", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5422, "elapsed": 98.318, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000085", "seed_id": "seed-00328", "prompt_concept": "memory", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1729, "elapsed": 41.008, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000086", "seed_id": "seed-00234", "prompt_concept": "relational model", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3746, "elapsed": 67.027, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000087", "seed_id": "seed-00234", "prompt_concept": "relational model", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3394, "elapsed": 322.494, "cached": false, "error": null, "ensemble": false}

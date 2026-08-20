@@ -1,0 +1,4 @@
+{"id": "corpus2-000148", "seed_id": "seed-00053", "prompt_concept": "primes", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3686, "elapsed": 79.456, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000149", "seed_id": "seed-00242", "prompt_concept": "scheduling", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2296, "elapsed": 38.937, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000150", "seed_id": "seed-00299", "prompt_concept": "RNNs", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5380, "elapsed": 114.781, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000151", "seed_id": "seed-00363", "prompt_concept": "logic", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2151, "elapsed": 43.852, "cached": false, "error": null, "ensemble": false}

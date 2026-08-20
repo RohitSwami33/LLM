@@ -1,0 +1,4 @@
+{"id": "corpus2-000056", "seed_id": "seed-00193", "prompt_concept": "structural analysis", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5849, "elapsed": 123.492, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000057", "seed_id": "seed-00034", "prompt_concept": "SVD", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2645, "elapsed": 104.039, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000058", "seed_id": "seed-00306", "prompt_concept": "Q-learning", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2846, "elapsed": 64.582, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000059", "seed_id": "seed-00235", "prompt_concept": "SQL", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2322, "elapsed": 59.381, "cached": false, "error": null, "ensemble": false}

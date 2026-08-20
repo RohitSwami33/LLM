@@ -1,0 +1,4 @@
+{"id": "corpus2-000140", "seed_id": "seed-00374", "prompt_concept": "international law", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1704, "elapsed": 51.063, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000141", "seed_id": "seed-00326", "prompt_concept": "planning", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5262, "elapsed": 110.473, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000142", "seed_id": "seed-00215", "prompt_concept": "functions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1885, "elapsed": 46.966, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000143", "seed_id": "seed-00185", "prompt_concept": "capacitors and inductors", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2183, "elapsed": 43.838, "cached": false, "error": null, "ensemble": false}

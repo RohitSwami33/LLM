@@ -1,0 +1,4 @@
+{"id": "corpus2-000192", "seed_id": "seed-00005", "prompt_concept": "ratios and proportions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6616, "elapsed": 142.178, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000193", "seed_id": "seed-00291", "prompt_concept": "decision trees", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1736, "elapsed": 141.018, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000194", "seed_id": "seed-00230", "prompt_concept": "trees", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4234, "elapsed": 100.903, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000195", "seed_id": "seed-00348", "prompt_concept": "constitutions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 165.507, "cached": false, "error": null, "ensemble": false}

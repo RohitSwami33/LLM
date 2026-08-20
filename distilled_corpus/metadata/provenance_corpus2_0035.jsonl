@@ -1,0 +1,4 @@
+{"id": "corpus2-000136", "seed_id": "seed-00342", "prompt_concept": "deserts", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4375, "elapsed": 112.043, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000137", "seed_id": "seed-00358", "prompt_concept": "socialization", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3202, "elapsed": 53.487, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000138", "seed_id": "seed-00254", "prompt_concept": "replication", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1208, "elapsed": 28.553, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000139", "seed_id": "seed-00373", "prompt_concept": "intellectual property", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2840, "elapsed": 52.053, "cached": false, "error": null, "ensemble": true}

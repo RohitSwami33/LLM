@@ -1,0 +1,4 @@
+{"id": "corpus2-000036", "seed_id": "seed-00351", "prompt_concept": "GDP", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2161, "elapsed": 50.937, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000037", "seed_id": "seed-00167", "prompt_concept": "ocean currents", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4222, "elapsed": 80.657, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000038", "seed_id": "seed-00272", "prompt_concept": "code generation", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 118.686, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000039", "seed_id": "seed-00329", "prompt_concept": "ReAct", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1711, "elapsed": 35.819, "cached": false, "error": null, "ensemble": false}

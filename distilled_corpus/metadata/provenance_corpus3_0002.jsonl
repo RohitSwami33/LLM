@@ -1,0 +1,7 @@
+{"id": "corpus3-000004", "seed_id": "seed-00005", "prompt_concept": "ratios and proportions", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 804, "elapsed": 55.73, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000006", "seed_id": "seed-00108", "prompt_concept": "quantum chemistry basics", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3221, "elapsed": 96.763, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000007", "seed_id": "seed-00178", "prompt_concept": "Big Bang", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 5724, "elapsed": 217.407, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000009", "seed_id": "seed-00039", "prompt_concept": "expectation and variance", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 746, "elapsed": 56.678, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000013", "seed_id": "seed-00105", "prompt_concept": "crystal field theory", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 4504, "elapsed": 110.145, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000023", "seed_id": "seed-00174", "prompt_concept": "galaxies", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3935, "elapsed": 102.597, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000035", "seed_id": "seed-00187", "prompt_concept": "semiconductor devices", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 810, "elapsed": 39.741, "cached": false, "error": null, "ensemble": false}

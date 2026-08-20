@@ -1,0 +1,4 @@
+{"id": "corpus3-000113", "seed_id": "seed-00250", "prompt_concept": "HTTP", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1385, "elapsed": 92.815, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000114", "seed_id": "seed-00206", "prompt_concept": "dynamics", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3705, "elapsed": 91.581, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000115", "seed_id": "seed-00108", "prompt_concept": "quantum chemistry basics", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 8485, "elapsed": 237.606, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000116", "seed_id": "seed-00073", "prompt_concept": "reflection and refraction", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3559, "elapsed": 119.63, "cached": false, "error": null, "ensemble": false}

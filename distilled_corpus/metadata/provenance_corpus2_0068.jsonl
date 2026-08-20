@@ -1,0 +1,4 @@
+{"id": "corpus2-000268", "seed_id": "seed-00036", "prompt_concept": "Bayes theorem", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 145.839, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000269", "seed_id": "seed-00028", "prompt_concept": "differential equations basics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1549, "elapsed": 49.322, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000270", "seed_id": "seed-00080", "prompt_concept": "quantum numbers", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1889, "elapsed": 43.935, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000271", "seed_id": "seed-00379", "prompt_concept": "nutrition basics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3329, "elapsed": 84.655, "cached": false, "error": null, "ensemble": false}

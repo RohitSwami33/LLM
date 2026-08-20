@@ -1,0 +1,4 @@
+{"id": "corpus2-000172", "seed_id": "seed-00230", "prompt_concept": "trees", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2827, "elapsed": 39.785, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000173", "seed_id": "seed-00122", "prompt_concept": "mitosis and meiosis", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4756, "elapsed": 92.421, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000174", "seed_id": "seed-00309", "prompt_concept": "image filtering", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2178, "elapsed": 37.838, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000175", "seed_id": "seed-00362", "prompt_concept": "ethics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 94, "elapsed": 2.917, "cached": false, "error": null, "ensemble": false}

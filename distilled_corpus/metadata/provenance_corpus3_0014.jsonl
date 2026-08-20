@@ -1,0 +1,3 @@
+{"id": "corpus3-000054", "seed_id": "seed-00127", "prompt_concept": "translation", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 333, "elapsed": 25.93, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000056", "seed_id": "seed-00134", "prompt_concept": "natural selection", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1276, "elapsed": 34.687, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000057", "seed_id": "seed-00352", "prompt_concept": "inflation", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 630, "elapsed": 20.123, "cached": false, "error": null, "ensemble": false}

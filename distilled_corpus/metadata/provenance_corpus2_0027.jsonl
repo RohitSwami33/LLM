@@ -1,0 +1,4 @@
+{"id": "corpus2-000104", "seed_id": "seed-00225", "prompt_concept": "graph algorithms", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1531, "elapsed": 27.114, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000105", "seed_id": "seed-00195", "prompt_concept": "hydraulics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2797, "elapsed": 53.944, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000106", "seed_id": "seed-00292", "prompt_concept": "ensembles", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1930, "elapsed": 49.746, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000107", "seed_id": "seed-00243", "prompt_concept": "memory management", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4544, "elapsed": 142.127, "cached": false, "error": null, "ensemble": true}

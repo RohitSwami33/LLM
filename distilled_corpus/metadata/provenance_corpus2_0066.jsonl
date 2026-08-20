@@ -1,0 +1,4 @@
+{"id": "corpus2-000260", "seed_id": "seed-00117", "prompt_concept": "nanomaterials", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1955, "elapsed": 91.319, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000261", "seed_id": "seed-00141", "prompt_concept": "biodiversity", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5709, "elapsed": 159.161, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000262", "seed_id": "seed-00382", "prompt_concept": "transportation", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5, "elapsed": 0.823, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000263", "seed_id": "seed-00270", "prompt_concept": "semantic analysis", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4754, "elapsed": 107.936, "cached": false, "error": null, "ensemble": false}

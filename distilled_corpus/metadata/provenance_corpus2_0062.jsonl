@@ -1,0 +1,3 @@
+{"id": "corpus2-000245", "seed_id": "seed-00287", "prompt_concept": "rate limiting", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4482, "elapsed": 67.063, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000246", "seed_id": "seed-00176", "prompt_concept": "exoplanets", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1738, "elapsed": 50.86, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000247", "seed_id": "seed-00005", "prompt_concept": "ratios and proportions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4061, "elapsed": 95.198, "cached": false, "error": null, "ensemble": false}

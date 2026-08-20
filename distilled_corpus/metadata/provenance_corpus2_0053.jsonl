@@ -1,0 +1,4 @@
+{"id": "corpus2-000208", "seed_id": "seed-00216", "prompt_concept": "recursion", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4202, "elapsed": 90.503, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000209", "seed_id": "seed-00058", "prompt_concept": "kinematics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1161, "elapsed": 64.18, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000210", "seed_id": "seed-00133", "prompt_concept": "population genetics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4500, "elapsed": 80.859, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000211", "seed_id": "seed-00192", "prompt_concept": "heat transfer", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3307, "elapsed": 81.97, "cached": false, "error": null, "ensemble": true}

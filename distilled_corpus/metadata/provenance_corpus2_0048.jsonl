@@ -1,0 +1,4 @@
+{"id": "corpus2-000188", "seed_id": "seed-00187", "prompt_concept": "semiconductor devices", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5091, "elapsed": 78.556, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000189", "seed_id": "seed-00001", "prompt_concept": "order of operations", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2803, "elapsed": 139.919, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000190", "seed_id": "seed-00013", "prompt_concept": "triangles", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3194, "elapsed": 84.464, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000191", "seed_id": "seed-00369", "prompt_concept": "narrative structure", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4104, "elapsed": 146.81, "cached": false, "error": null, "ensemble": false}

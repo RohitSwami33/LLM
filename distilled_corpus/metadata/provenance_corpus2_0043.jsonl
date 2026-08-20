@@ -1,0 +1,4 @@
+{"id": "corpus2-000168", "seed_id": "seed-00043", "prompt_concept": "hypothesis testing", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2026, "elapsed": 49.66, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000169", "seed_id": "seed-00287", "prompt_concept": "rate limiting", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3002, "elapsed": 55.393, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000170", "seed_id": "seed-00018", "prompt_concept": "trig functions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 98.953, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000171", "seed_id": "seed-00223", "prompt_concept": "greedy algorithms", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3056, "elapsed": 64.714, "cached": false, "error": null, "ensemble": false}

@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sem5 Project — LLM Pretraining from Scratch</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --bg-soft: #11151f;
+    --card: #151a26;
+    --border: #232a3b;
+    --text: #e6e9f0;
+    --muted: #9aa4b8;
+    --accent: #5eead4;
+    --accent-2: #818cf8;
+    --accent-3: #f472b6;
+    --good: #4ade80;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* Nav */
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(11,14,20,0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav .container { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+  .logo { font-weight: 700; letter-spacing: 0.02em; }
+  .logo span { color: var(--accent); }
+  nav ul { display: flex; gap: 20px; list-style: none; }
+  nav a { color: var(--muted); text-decoration: none; font-size: 14px; }
+  nav a:hover { color: var(--text); }
+
+  /* Hero */
+  header { padding: 96px 0 72px; text-align: center; }
+  .badge {
+    display: inline-block; padding: 4px 14px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--accent);
+    font-size: 13px; margin-bottom: 24px; background: var(--bg-soft);
+  }
+  h1 {
+    font-size: clamp(34px, 6vw, 56px); line-height: 1.15; font-weight: 800;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .subtitle { color: var(--muted); font-size: 18px; max-width: 640px; margin: 20px auto 0; }
+
+  /* Stats row */
+  .stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px; margin-top: 56px;
+  }
+  .stat {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+  }
+  .stat .num { font-size: 26px; font-weight: 700; color: var(--accent); }
+  .stat .lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* Sections */
+  section { padding: 56px 0; }
+  h2 { font-size: 28px; margin-bottom: 8px; }
+  .section-sub { color: var(--muted); margin-bottom: 32px; max-width: 720px; }
+
+  /* Pipeline */
+  .pipeline { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .step {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px; position: relative;
+  }
+  .step .n {
+    width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #0b0e14; font-weight: 700; font-size: 14px; margin-bottom: 12px;
+  }
+  .step h3 { font-size: 15px; margin-bottom: 6px; }
+  .step p { font-size: 13px; color: var(--muted); }
+
+  /* Cards */
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px;
+  }
+  .card h3 { font-size: 17px; margin-bottom: 10px; }
+  .card ul { list-style: none; }
+  .card li { font-size: 14px; color: var(--muted); padding: 5px 0 5px 20px; position: relative; }
+  .card li::before { content: "▸"; position: absolute; left: 0; color: var(--accent); }
+  .tag {
+    display: inline-block; font-size: 12px; padding: 2px 10px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--accent-2); margin-bottom: 12px;
+  }
+
+  /* Table */
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+  th { color: var(--muted); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td:first-child { color: var(--muted); }
+  .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; }
+  .hl { color: var(--accent); font-weight: 600; }
+
+  /* Timeline */
+  .timeline { border-left: 2px solid var(--border); margin-left: 8px; padding-left: 28px; }
+  .tl-item { position: relative; padding-bottom: 28px; }
+  .tl-item::before {
+    content: ""; position: absolute; left: -36px; top: 6px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 0 4px rgba(94,234,212,0.15);
+  }
+  .tl-item h3 { font-size: 15px; }
+  .tl-item p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+  /* Roadmap */
+  .roadmap li { list-style: none; padding: 10px 0 10px 32px; position: relative; font-size: 15px; }
+  .roadmap li::before {
+    content: "✓"; position: absolute; left: 0; top: 10px;
+    width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; background: rgba(74,222,128,0.15); color: var(--good);
+  }
+  .roadmap li.open::before { content: "→"; background: rgba(129,140,248,0.15); color: var(--accent-2); }
+  .roadmap li.done { color: var(--muted); text-decoration: line-through; }
+
+  footer {
+    border-top: 1px solid var(--border); padding: 32px 0; text-align: center;
+    color: var(--muted); font-size: 13px;
+  }
+  code {
+    background: var(--bg-soft); border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 6px; font-size: 13px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <div class="logo">Sem5<span>_project</span></div>
+    <ul>
+      <li><a href="#pipeline">Pipeline</a></li>
+      <li><a href="#models">Models</a></li>
+      <li><a href="#results">Results</a></li>
+      <li><a href="#journey">Journey</a></li>
+      <li><a href="#roadmap">Roadmap</a></li>
+    </ul>
+  </div>
+</nav>
+
+<header class="container">
+  <div class="badge">Semester 5 · Research Project</div>
+  <h1>LLM Pretraining<br>from Scratch</h1>
+  <p class="subtitle">
+    A production-ready dataset pipeline and hands-on pretraining of small
+    language models — from raw Hugging Face corpora to a trained 68.7M
+    TransformerLM and a 70M Hybrid-MoE research model, all on free Kaggle GPUs.
+  </p>
+
+  <div class="stats">
+    <div class="stat"><div class="num">3.28B</div><div class="lbl">tokens pre-trained</div></div>
+    <div class="stat"><div class="num">68.7M</div><div class="lbl">dense model params</div></div>
+    <div class="stat"><div class="num">4.587</div><div class="lbl">best val loss</div></div>
+    <div class="stat"><div class="num">5</div><div class="lbl">source datasets</div></div>
+    <div class="stat"><div class="num">32K</div><div class="lbl">MoE context window</div></div>
+  </div>
+</header>
+
+<section id="pipeline" class="container">
+  <h2>Dataset Pipeline</h2>
+  <p class="section-sub">
+    Configurable, reproducible, and streaming-first. The same YAML config + seed
+    always produces the same corpus.
+  </p>
+  <div class="pipeline">
+    <div class="step"><div class="n">1</div><h3>Download</h3><p>Stream or cache FineWeb, FineWeb-Edu, Dolma, The Stack v2, and Wikipedia from Hugging Face with auto version detection.</p></div>
+    <div class="step"><div class="n">2</div><h3>Preprocess</h3><p>HTML stripping, Unicode NFKC, whitespace normalization, SHA-256 dedup, length and language filters.</p></div>
+    <div class="step"><div class="n">3</div><h3>Mix</h3><p>Reservoir sampling per dataset, deterministic global shuffle, sharded JSONL/Arrow output.</p></div>
+    <div class="step"><div class="n">4</div><h3>Tokenize</h3><p>Tokenizer-ready text shards; SentencePiece BPE, vocab 32,000.</p></div>
+    <div class="step"><div class="n">5</div><h3>Train</h3><p>Transformer, Mamba, Hybrid, HRM &amp; TRM compatible corpora for pretraining and post-training.</p></div>
+  </div>
+</section>
+
+<section id="models" class="container">
+  <h2>Models</h2>
+  <p class="section-sub">Two independent training tracks, both managed entirely from the CLI.</p>
+  <div class="grid-2">
+    <div class="card">
+      <span class="tag">Track 1 · Dense</span>
+      <h3>68.7M TransformerLM</h3>
+      <ul>
+        <li>Decoder-only: RMSNorm, SwiGLU, RoPE, no bias, no weight tying</li>
+        <li>d_model 576 · 6 layers · 8 heads · d_ff 2304 · vocab 32k</li>
+        <li>2048 context · AdamW (3e-4 → 3e-5) · FP16 autocast</li>
+        <li>Effective batch 32 · ~3.28B tokens over ~10 epochs</li>
+        <li>Trained on a single Kaggle T4 over multiple resumed sessions</li>
+      </ul>
+    </div>
+    <div class="card">
+      <span class="tag">Track 2 · Research</span>
+      <h3>70M Hybrid-MoE (32K context)</h3>
+      <ul>
+        <li>Block-sparse attention: window 8192 + 128-token anchor (FlexAttention)</li>
+        <li>DeepSeek-style MoE with shared experts</li>
+        <li>MuonClip optimizer with per-head QK-Clip</li>
+        <li>8K → 32K context curriculum</li>
+        <li>From-scratch research design with literature-review verdicts</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="results" class="container">
+  <h2>Results</h2>
+  <p class="section-sub">Dense 68.7M run — completed at 50,000 steps in 6.31 h for the final push.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Milestone</th><th>Train loss</th><th>Val loss</th><th>Val PPL</th><th>Val acc</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>8,000 steps (early)</td><td>—</td><td>—</td><td>—</td><td>24.8%</td></tr>
+        <tr><td>24,500 steps</td><td>~4.58</td><td>4.6783</td><td>107.59</td><td>25.52%</td></tr>
+        <tr><td>29,500 steps</td><td>4.49</td><td>4.6422</td><td>103.77</td><td>25.86%</td></tr>
+        <tr><td>50,000 steps (final)</td><td>—</td><td class="hl">4.5870</td><td class="hl">≈ 98.2</td><td>—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="journey" class="container">
+  <h2>The Journey</h2>
+  <p class="section-sub">Pretraining on free GPUs is as much an ops project as a research one.</p>
+  <div class="timeline">
+    <div class="tl-item">
+      <h3>Seven failed kernel pushes (v1–v7)</h3>
+      <p>NaN losses from Muon on embeddings, wrong corpus mounts, RoPE crashes under DataParallel, a 2.1 GB fp32 logits OOM — each failure surfaced the next fix, ending in the first healthy run at ~26.4k tok/s.</p>
+    </div>
+    <div class="tl-item">
+      <h3>Checkpoint upload / resume machinery</h3>
+      <p>Every 500 steps, <code>resume.pt</code> is pushed as a new version of a Kaggle dataset and pulled back on boot — enabling training across 12 h sessions and account moves.</p>
+    </div>
+    <div class="tl-item">
+      <h3>The account saga</h3>
+      <p>New Kaggle accounts silently ran CPU-only with dead DNS until identity verification. A probe-kernel workflow (CUDA + DNS checks) became standard practice before any real run.</p>
+    </div>
+    <div class="tl-item">
+      <h3>11 OOMs to a live MoE run (v4→v15)</h3>
+      <p>Sub-blocked softmax, per-chunk loss checkpoints, expandable allocator segments, and per-sub-block gradient checkpoints finally flattened memory to ~3.8 GB live — first healthy MoE step at loss 23.2, 1,435 tok/s.</p>
+    </div>
+    <div class="tl-item">
+      <h3>Dense pretraining complete</h3>
+      <p>50,000 / 50,000 steps, 3.28B tokens, best val loss 4.5870. The final checkpoint is the SFT/DPO base for the post-training phase.</p>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap" class="container">
+  <h2>Roadmap</h2>
+  <p class="section-sub">Where the project goes next.</p>
+  <div class="card">
+    <ul class="roadmap">
+      <li class="done">Finish 50k-step dense pretraining (3.28B tokens)</li>
+      <li class="open">Post-training: SFT on curated data, then DPO/KTO preference tuning</li>
+      <li class="open">Complete 70M Hybrid-MoE 32K-context run with checkpoint resume</li>
+      <li class="open">Evals against the repo's evaluation harness</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="container">Sem5 Project · LLM Dataset Pipeline &amp; Pretraining · Built with plain HTML/CSS</div>
+</footer>
+
+</body>
+</html>

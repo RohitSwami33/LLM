@@ -1,0 +1,48 @@
+{
+  "source": "reports/teacher_benchmark.json",
+  "overall_scores": {
+    "GLM-5.2-NVFP4": 0.9,
+    "Qwen/Qwen3.6-35B-A3B-FP8": 0.85,
+    "Kimi-K2.7-Code": 0.85,
+    "DeepSeek-V4-Flash-0731": 0.8
+  },
+  "findings": [
+    "All four teachers are strong (0.80-0.90 overall); ensembles will have high agreement, supporting verification.",
+    "GLM-5.2 is best overall and best on science (0.75) -> route science/general knowledge/long context.",
+    "Qwen3.6 best on math (0.75) and structured output -> route math/programming/cs/multilingual.",
+    "Kimi-K2.7-Code perfect on coding -> route code/algorithms/code-verification.",
+    "DeepSeek-Flash is fastest, perfect on reasoning/general_knowledge/writing/long_context/structured but weaker on math/science substring checks -> route high-volume fast knowledge/explanatory text and reasoning; not primary for math/science.",
+    "Math is the weakest category for all (substring matching is strict); use numeric verification + ensembles for math docs."
+  ],
+  "routing": {
+    "primary_by_domain": {
+      "general_knowledge": "z-ai/glm-5.2",
+      "mathematics": "z-ai/glm-5.2",
+      "physics": "z-ai/glm-5.2",
+      "chemistry": "z-ai/glm-5.2",
+      "biology": "z-ai/glm-5.2",
+      "earth_space": "z-ai/glm-5.2",
+      "engineering": "z-ai/glm-5.2",
+      "technology": "z-ai/glm-5.2",
+      "programming": "z-ai/glm-5.2"
+    },
+    "by_task_type": {
+      "code_with_explanation": "z-ai/glm-5.2",
+      "proof_or_derivation": "z-ai/glm-5.2",
+      "long_synthesis": "z-ai/glm-5.2",
+      "educational_explanation": "z-ai/glm-5.2",
+      "encyclopedia_article": "z-ai/glm-5.2"
+    },
+    "high_throughput_default": "z-ai/glm-5.2",
+    "ensemble_for": [
+      "science_factual",
+      "math_key_results",
+      "definitions_core_concepts"
+    ],
+    "ensemble_members": [
+      "z-ai/glm-5.2"
+    ],
+    "verification_model": "nvidia/nemotron-3-ultra-550b-a55b"
+  },
+  "note": "Routing is evidence-based from the benchmark, not assumed. Because all teachers are competent, we deliberately mix teachers across domains to avoid the student imitating one teacher's style."
+}

@@ -70,3 +70,10 @@ checkpoints/
 tokenized/
 experiments/
 checkpoint_upload/
+
+# Distilled corpus: regenerable / cache / heavy intermediates
+distilled_corpus/raw/
+distilled_corpus/metadata/api_cache/
+distilled_corpus/benchmark/
+distilled_corpus/config/
+distilled_corpus/evaluation/

@@ -1,0 +1,4 @@
+{"id": "corpus2-000020", "seed_id": "seed-00132", "prompt_concept": "mutations", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1994, "elapsed": 56.223, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000021", "seed_id": "seed-00193", "prompt_concept": "structural analysis", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 143.512, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000022", "seed_id": "seed-00332", "prompt_concept": "Roman empire", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3250, "elapsed": 70.467, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000023", "seed_id": "seed-00247", "prompt_concept": "TCP/IP", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 103.737, "cached": false, "error": null, "ensemble": true}

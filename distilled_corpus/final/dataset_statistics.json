@@ -1,0 +1,80 @@
+{
+  "total_documents": 1252,
+  "total_characters": 12284526,
+  "estimated_tokens": 3070674,
+  "tokens_by_domain": {
+    "technology": 940161,
+    "biology": 290393,
+    "engineering": 304500,
+    "chemistry": 216376,
+    "general_knowledge": 485226,
+    "earth_space": 174748,
+    "mathematics": 426903,
+    "physics": 232367
+  },
+  "documents_by_domain": {
+    "technology": 380,
+    "biology": 111,
+    "engineering": 120,
+    "chemistry": 92,
+    "general_knowledge": 176,
+    "earth_space": 85,
+    "mathematics": 180,
+    "physics": 108
+  },
+  "tokens_by_difficulty": {
+    "4": 843364,
+    "3": 863356,
+    "2": 399936,
+    "1": 272807,
+    "5": 465565,
+    "6": 225646
+  },
+  "tokens_by_task_type": {
+    "encyclopedia_article": 763677,
+    "educational_explanation": 1000789,
+    "reasoning_example": 89654,
+    "qa_problem_solving": 170210,
+    "comparison": 164239,
+    "proof_or_derivation": 172439,
+    "worked_example": 348214,
+    "long_synthesis": 265509,
+    "code_with_explanation": 95943
+  },
+  "tokens_by_teacher": {
+    "nvidia/nemotron-3-ultra-550b-a55b": 644968,
+    "poolside/laguna-s-2.1:free": 42581,
+    "nvidia/nemotron-3-super-120b-a12b": 2114922,
+    "poolside/laguna-s-2.1:free+GLM-5.2-NVFP4": 7768,
+    "z-ai/glm-5.2": 260435
+  },
+  "documents_by_teacher": {
+    "nvidia/nemotron-3-ultra-550b-a55b": 279,
+    "poolside/laguna-s-2.1:free": 23,
+    "nvidia/nemotron-3-super-120b-a12b": 872,
+    "poolside/laguna-s-2.1:free+GLM-5.2-NVFP4": 6,
+    "z-ai/glm-5.2": 72
+  },
+  "context_length_distribution": {
+    "4096": 313,
+    "8192": 183,
+    "2048": 318,
+    "1024": 283,
+    "512": 116,
+    "16384": 35,
+    "32768": 1,
+    "256": 3
+  },
+  "percentage_synthetic": 100.0,
+  "percentage_source_grounded": 0.0,
+  "percentage_verified": 100.0,
+  "verification_verdicts": {
+    "keep": 66,
+    "review": 1186
+  },
+  "average_quality_score": 0.701,
+  "languages": {
+    "en": 1252
+  },
+  "token_estimate_method": "chars / 4.0 (rough; recompute with actual tokenizer later)"
+}

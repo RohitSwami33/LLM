@@ -1,0 +1,4 @@
+{"id": "corpus2-000072", "seed_id": "seed-00138", "prompt_concept": "food webs", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2923, "elapsed": 43.739, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000073", "seed_id": "seed-00161", "prompt_concept": "earthquakes", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 165.837, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000074", "seed_id": "seed-00229", "prompt_concept": "stacks and queues", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2699, "elapsed": 78.777, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000075", "seed_id": "seed-00258", "prompt_concept": "containers", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2199, "elapsed": 56.966, "cached": false, "error": null, "ensemble": false}

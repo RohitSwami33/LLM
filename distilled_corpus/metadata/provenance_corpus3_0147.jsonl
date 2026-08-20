@@ -1,0 +1,1 @@
+{"id": "corpus3-000591", "seed_id": "seed-00251", "prompt_concept": "sockets", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 885, "elapsed": 49.013, "cached": true, "error": null, "ensemble": false}

@@ -1,0 +1,8 @@
+{"id": "corpus3-000003", "seed_id": "seed-00055", "prompt_concept": "gcd and lcm", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 2600, "elapsed": 124.194, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000001", "seed_id": "seed-00343", "prompt_concept": "oceans", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3123, "elapsed": 112.688, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000002", "seed_id": "seed-00162", "prompt_concept": "volcanism", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1622, "elapsed": 55.943, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000005", "seed_id": "seed-00363", "prompt_concept": "logic", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1608, "elapsed": 62.211, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000000", "seed_id": "seed-00022", "prompt_concept": "limits", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3472, "elapsed": 84.075, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000008", "seed_id": "seed-00216", "prompt_concept": "recursion", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1277, "elapsed": 63.989, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000011", "seed_id": "seed-00084", "prompt_concept": "spacetime", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1189, "elapsed": 26.824, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000012", "seed_id": "seed-00221", "prompt_concept": "searching", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 5977, "elapsed": 201.461, "cached": false, "error": null, "ensemble": false}

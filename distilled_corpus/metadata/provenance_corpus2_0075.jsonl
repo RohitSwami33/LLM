@@ -1,0 +1,4 @@
+{"id": "corpus2-000296", "seed_id": "seed-00289", "prompt_concept": "linear regression", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3424, "elapsed": 85.855, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000297", "seed_id": "seed-00183", "prompt_concept": "Ohm's law", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3634, "elapsed": 73.156, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000298", "seed_id": "seed-00370", "prompt_concept": "contract law", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 7163, "elapsed": 144.93, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000299", "seed_id": "seed-00369", "prompt_concept": "narrative structure", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3120, "elapsed": 53.017, "cached": false, "error": null, "ensemble": false}

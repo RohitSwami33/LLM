@@ -1,0 +1,4 @@
+{"id": "corpus2-000216", "seed_id": "seed-00140", "prompt_concept": "population dynamics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3462, "elapsed": 77.039, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000217", "seed_id": "seed-00057", "prompt_concept": "Newton's laws", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1991, "elapsed": 55.023, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000218", "seed_id": "seed-00075", "prompt_concept": "interference and diffraction", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3135, "elapsed": 70.11, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000219", "seed_id": "seed-00223", "prompt_concept": "greedy algorithms", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3289, "elapsed": 74.079, "cached": false, "error": null, "ensemble": false}

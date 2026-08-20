@@ -1,0 +1,4 @@
+{"id": "corpus2-000052", "seed_id": "seed-00260", "prompt_concept": "scalability", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4873, "elapsed": 103.366, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000053", "seed_id": "seed-00228", "prompt_concept": "linked lists", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1067, "elapsed": 22.843, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000054", "seed_id": "seed-00036", "prompt_concept": "Bayes theorem", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3107, "elapsed": 93.598, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000055", "seed_id": "seed-00020", "prompt_concept": "law of sines and cosines", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2054, "elapsed": 66.336, "cached": false, "error": null, "ensemble": false}

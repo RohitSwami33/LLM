@@ -1,0 +1,1 @@
+{"id": "corpus3-000111", "seed_id": "seed-00336", "prompt_concept": "world wars", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 2595, "elapsed": 55.639, "cached": false, "error": null, "ensemble": false}

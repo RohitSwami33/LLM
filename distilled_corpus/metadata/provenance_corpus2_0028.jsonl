@@ -1,0 +1,4 @@
+{"id": "corpus2-000108", "seed_id": "seed-00348", "prompt_concept": "constitutions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1859, "elapsed": 39.676, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000109", "seed_id": "seed-00240", "prompt_concept": "ACID", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3953, "elapsed": 59.066, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000110", "seed_id": "seed-00379", "prompt_concept": "nutrition basics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1470, "elapsed": 33.014, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000111", "seed_id": "seed-00367", "prompt_concept": "literary devices", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4490, "elapsed": 96.01, "cached": false, "error": null, "ensemble": false}

@@ -1,0 +1,4 @@
+{"id": "corpus2-000124", "seed_id": "seed-00042", "prompt_concept": "descriptive statistics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 152.098, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000125", "seed_id": "seed-00014", "prompt_concept": "circles", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1844, "elapsed": 42.251, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000126", "seed_id": "seed-00121", "prompt_concept": "cell cycle", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 798, "elapsed": 22.009, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000127", "seed_id": "seed-00208", "prompt_concept": "motion planning", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1429, "elapsed": 42.232, "cached": false, "error": null, "ensemble": false}

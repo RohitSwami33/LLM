@@ -1,0 +1,4 @@
+{"id": "corpus2-000080", "seed_id": "seed-00369", "prompt_concept": "narrative structure", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4598, "elapsed": 104.615, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000081", "seed_id": "seed-00163", "prompt_concept": "climate systems", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1906, "elapsed": 31.325, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000082", "seed_id": "seed-00028", "prompt_concept": "differential equations basics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4521, "elapsed": 101.736, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000083", "seed_id": "seed-00094", "prompt_concept": "chemical bonding", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2755, "elapsed": 97.76, "cached": false, "error": null, "ensemble": false}

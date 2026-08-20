@@ -1,0 +1,4 @@
+{"id": "corpus3-000085", "seed_id": "seed-00001", "prompt_concept": "order of operations", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 704, "elapsed": 24.472, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000086", "seed_id": "seed-00142", "prompt_concept": "bacteria", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1826, "elapsed": 84.364, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000087", "seed_id": "seed-00100", "prompt_concept": "reaction mechanisms", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 2853, "elapsed": 44.045, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000088", "seed_id": "seed-00035", "prompt_concept": "probability axioms", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 5295, "elapsed": 126.876, "cached": false, "error": null, "ensemble": false}

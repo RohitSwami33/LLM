@@ -1,0 +1,4 @@
+{"id": "corpus2-000032", "seed_id": "seed-00249", "prompt_concept": "DNS", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1023, "elapsed": 35.955, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000033", "seed_id": "seed-00069", "prompt_concept": "electric fields", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3450, "elapsed": 90.151, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000034", "seed_id": "seed-00338", "prompt_concept": "decolonization", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6343, "elapsed": 121.781, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000035", "seed_id": "seed-00264", "prompt_concept": "hashing", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 125.547, "cached": false, "error": null, "ensemble": true}

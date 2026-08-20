@@ -1,0 +1,4 @@
+{"id": "corpus2-000160", "seed_id": "seed-00208", "prompt_concept": "motion planning", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1963, "elapsed": 53.578, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000161", "seed_id": "seed-00197", "prompt_concept": "mass balance", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1339, "elapsed": 44.105, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000162", "seed_id": "seed-00267", "prompt_concept": "threat modeling", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 616, "elapsed": 11.552, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000163", "seed_id": "seed-00338", "prompt_concept": "decolonization", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4700, "elapsed": 75.468, "cached": false, "error": null, "ensemble": false}

@@ -1,0 +1,4 @@
+{"id": "corpus2-000144", "seed_id": "seed-00279", "prompt_concept": "testing", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6263, "elapsed": 94.317, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000145", "seed_id": "seed-00160", "prompt_concept": "rock cycle", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5617, "elapsed": 138.796, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000146", "seed_id": "seed-00112", "prompt_concept": "metabolism", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5107, "elapsed": 96.155, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000147", "seed_id": "seed-00249", "prompt_concept": "DNS", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4065, "elapsed": 98.098, "cached": false, "error": null, "ensemble": false}

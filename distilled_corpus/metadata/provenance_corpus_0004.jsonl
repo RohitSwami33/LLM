@@ -1,0 +1,3 @@
+{"id": "gen-000009", "seed_id": "seed-00256", "prompt_concept": "mapreduce", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 653, "elapsed": 12.973, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000010", "seed_id": "seed-00081", "prompt_concept": "special relativity", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 2385, "elapsed": 45.088, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000011", "seed_id": "seed-00346", "prompt_concept": "separation of powers", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 1698, "elapsed": 39.066, "cached": false, "error": null, "ensemble": false}

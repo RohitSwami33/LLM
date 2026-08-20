@@ -1,0 +1,4 @@
+{"id": "corpus2-000228", "seed_id": "seed-00037", "prompt_concept": "random variables", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2354, "elapsed": 68.793, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000229", "seed_id": "seed-00003", "prompt_concept": "decimals", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2753, "elapsed": 127.274, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000230", "seed_id": "seed-00330", "prompt_concept": "multi-agent systems", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 542, "elapsed": 38.441, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000231", "seed_id": "seed-00155", "prompt_concept": "recombinant DNA", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1237, "elapsed": 27.706, "cached": false, "error": null, "ensemble": true}

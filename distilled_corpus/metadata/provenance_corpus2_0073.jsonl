@@ -1,0 +1,4 @@
+{"id": "corpus2-000288", "seed_id": "seed-00018", "prompt_concept": "trig functions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3490, "elapsed": 67.476, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000289", "seed_id": "seed-00141", "prompt_concept": "biodiversity", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 177.206, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000290", "seed_id": "seed-00124", "prompt_concept": "photosynthesis", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4878, "elapsed": 99.057, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000291", "seed_id": "seed-00129", "prompt_concept": "gene regulation", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2434, "elapsed": 101.239, "cached": false, "error": null, "ensemble": false}

@@ -1,0 +1,104 @@
+{
+  "student_target": {
+    "params": "1-2B",
+    "context_length_target": 32768,
+    "type": "decoder-only pretraining"
+  },
+  "purpose": "pretraining-corpus generation via multi-teacher distillation (NOT instruction tuning). Majority of text is plain natural-language documents.",
+
+  "teachers": {
+    "DeepSeek-V4-Flash-0731": {"role": "fast_knowledge/math/science", "max_tokens": 1500, "temperature": 0.4},
+    "Qwen/Qwen3.6-35B-A3B-FP8": {"role": "code/cs/structured/multilingual", "max_tokens": 6000, "temperature": 0.5},
+    "GLM-5.2-NVFP4": {"role": "general_knowledge/long_context/alternative_answer", "max_tokens": 6000, "temperature": 0.5},
+    "Kimi-K2.7-Code": {"role": "code/algorithms/verification", "max_tokens": 6000, "temperature": 0.4}
+  },
+
+  "routing": "decided_by_benchmark; see reports/teacher_benchmark.json -> routing_recommendation. Ensembles used for high-value factual/scientific concepts (>=2 independent teachers).",
+
+  "domain_mixture_target_pct": {
+    "general_knowledge": 16,
+    "mathematics": 14,
+    "physics": 9,
+    "chemistry": 7,
+    "biology": 8,
+    "earth_space": 5,
+    "engineering": 8,
+    "technology": 18,
+    "programming": 10,
+    "reasoning": 5
+  },
+
+  "difficulty_distribution_pct": {
+    "1_basic_factual": 15,
+    "2_basic_explanation": 20,
+    "3_application": 25,
+    "4_multi_step_reasoning": 22,
+    "5_advanced_reasoning": 13,
+    "6_expert_synthesis": 5
+  },
+
+  "context_length_distribution_pct": {
+    "256": 12,
+    "512": 18,
+    "1024": 20,
+    "2048": 18,
+    "4096": 14,
+    "8192": 9,
+    "16384": 6,
+    "32768": 3
+  },
+  "context_length_note": "Log-decaying: most compute on short-medium docs; small but meaningful fraction at 8K-32K to induce long-context capability without wasting budget. Long docs are multi-section educational articles / multi-document syntheses, not padded short ones.",
+
+  "task_type_distribution_pct": {
+    "educational_explanation": 30,
+    "encyclopedia_article": 18,
+    "worked_example": 12,
+    "proof_or_derivation": 8,
+    "comparison": 6,
+    "qa_problem_solving": 8,
+    "code_with_explanation": 10,
+    "long_synthesis": 5,
+    "reasoning_example": 3
+  },
+
+  "synthetic_vs_sourced": {
+    "target_synthetic_pct": 70,
+    "target_source_grounded_pct": 30,
+    "note": "100% synthetic is suboptimal (model collapse risk, knowledge loss). Source-grounded seeds (open OER, public references) anchor facts; teachers synthesize/expand, never just paraphrase."
+  },
+
+  "token_budget_experiments": {
+    "A_100M": {"docs_est": "300k-500k", "use": "fast ablation / tokenizer validation", "note": "Chinchilla would suggest >=20B for compute-optimal 1-2B, but Phi-series show curated 100B-level corpora work; 100M is a smoke test only."},
+    "B_500M": {"docs_est": "1.2M-2M", "use": "small but usable pretraining run", "note": "Knowledge-dense 500M can beat multi-B raw web for a 1-2B model (Phi-1.5 evidence)."},
+    "C_1B": {"docs_est": "2.5M-4M", "use": "primary recommended target", "note": "Strong quality/quantity balance for 1-2B with curated distillation. Recommended."},
+    "D_3B_plus": {"docs_est": "7M+", "use": "full run if budget allows", "note": "Diminishing returns past ~1-2B curated tokens for 1-2B params; gains marginal unless adding new domains."}
+  },
+  "recommended_target": "C_1B",
+
+  "reasoning_representation": "concise verifiable derivations (proofs, explicit calculations, structured steps with intermediate conclusions). NOT verbose private CoT for every example. Only ~10-15% of corpus is reasoning-traced.",
+
+  "quality_control": {
+    "scoring_dims": ["factual_correctness","reasoning_correctness","relevance","clarity","educational_value","originality","difficulty","source_quality","verification_confidence","language_quality"],
+    "verdicts": ["KEEP","REVIEW","REJECT"],
+    "reject_if": ["hallucination","contradiction","broken_reasoning","incorrect_math","incorrect_science","broken_code","duplicate","excessive_filler","teacher_artifact","unsupported_claim"]
+  },
+
+  "verification": {
+    "math": "numeric/symbolic check + multi-teacher agreement",
+    "code": "execute in sandbox, assert expected output",
+    "science": "multi-teacher agreement + reject on conflict that cannot be resolved",
+    "general": "independent verification pass by a different teacher"
+  },
+
+  "dedup": ["exact_sha256","normalized_whitespace_punct","near_minhash_ngram","semantic_embedding_cosine"],
+
+  "api_efficiency": {
+    "concurrency": 6,
+    "retries": 5,
+    "backoff": "exponential cap 20s",
+    "cache": "sha256(prompt+model+temp+max_tokens+seed) on disk",
+    "resumable": true
+  },
+
+  "pilot": {"n_docs_target": 120, "purpose": "measure quality, redundancy, token distribution, throughput, verification failure rate, cost before scaling"}
+}

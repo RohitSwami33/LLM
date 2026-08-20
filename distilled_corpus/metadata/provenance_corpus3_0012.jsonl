@@ -1,0 +1,3 @@
+{"id": "corpus3-000046", "seed_id": "seed-00308", "prompt_concept": "PPO basics", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 5740, "elapsed": 198.458, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000048", "seed_id": "seed-00358", "prompt_concept": "socialization", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1361, "elapsed": 66.876, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000049", "seed_id": "seed-00309", "prompt_concept": "image filtering", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 405, "elapsed": 13.181, "cached": false, "error": null, "ensemble": false}

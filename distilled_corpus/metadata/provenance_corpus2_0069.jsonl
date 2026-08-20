@@ -1,0 +1,4 @@
+{"id": "corpus2-000272", "seed_id": "seed-00110", "prompt_concept": "proteins", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2357, "elapsed": 61.973, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000273", "seed_id": "seed-00256", "prompt_concept": "mapreduce", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2156, "elapsed": 52.558, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000274", "seed_id": "seed-00219", "prompt_concept": "functional programming", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2401, "elapsed": 84.225, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000275", "seed_id": "seed-00034", "prompt_concept": "SVD", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3588, "elapsed": 125.759, "cached": false, "error": null, "ensemble": false}

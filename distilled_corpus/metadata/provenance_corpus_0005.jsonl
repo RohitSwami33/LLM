@@ -1,0 +1,3 @@
+{"id": "gen-000012", "seed_id": "seed-00282", "prompt_concept": "refactoring", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 2283, "elapsed": 48.77, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000013", "seed_id": "seed-00332", "prompt_concept": "Roman empire", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 516, "elapsed": 15.468, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000014", "seed_id": "seed-00293", "prompt_concept": "clustering", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 461, "elapsed": 10.836, "cached": false, "error": null, "ensemble": false}

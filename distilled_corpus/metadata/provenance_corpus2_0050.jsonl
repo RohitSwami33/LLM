@@ -1,0 +1,4 @@
+{"id": "corpus2-000196", "seed_id": "seed-00271", "prompt_concept": "optimization", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1125, "elapsed": 23.732, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000197", "seed_id": "seed-00204", "prompt_concept": "transfer functions", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 164.87, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000198", "seed_id": "seed-00053", "prompt_concept": "primes", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5566, "elapsed": 170.916, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000199", "seed_id": "seed-00066", "prompt_concept": "heat engines", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1213, "elapsed": 19.842, "cached": false, "error": null, "ensemble": false}

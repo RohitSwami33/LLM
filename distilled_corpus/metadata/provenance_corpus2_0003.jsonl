@@ -1,0 +1,4 @@
+{"id": "corpus2-000008", "seed_id": "seed-00144", "prompt_concept": "antibiotics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5769, "elapsed": 119.129, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000009", "seed_id": "seed-00263", "prompt_concept": "encryption", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 116.458, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000010", "seed_id": "seed-00088", "prompt_concept": "stellar evolution", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2160, "elapsed": 38.731, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000011", "seed_id": "seed-00206", "prompt_concept": "dynamics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1942, "elapsed": 33.559, "cached": false, "error": null, "ensemble": true}

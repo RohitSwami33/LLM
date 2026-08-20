@@ -1,0 +1,13 @@
+{
+  "input": 1257,
+  "after_exact_normalized": 1254,
+  "after_near_duplicate": 1254,
+  "after_semantic": 1252,
+  "dropped": {
+    "exact": 3,
+    "semantic": 2
+  },
+  "total_dropped": 5,
+  "near_thresh": 0.85,
+  "sem_thresh": 0.92
+}

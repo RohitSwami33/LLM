@@ -1,0 +1,4 @@
+{"id": "corpus2-000112", "seed_id": "seed-00177", "prompt_concept": "stellar classification", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5572, "elapsed": 120.894, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000113", "seed_id": "seed-00172", "prompt_concept": "moons", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1233, "elapsed": 43.327, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000114", "seed_id": "seed-00251", "prompt_concept": "sockets", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3225, "elapsed": 56.35, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000115", "seed_id": "seed-00252", "prompt_concept": "consensus", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 627, "elapsed": 16.292, "cached": false, "error": null, "ensemble": false}

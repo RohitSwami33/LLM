@@ -1,0 +1,3 @@
+{"id": "gen-000006", "seed_id": "seed-00006", "prompt_concept": "linear equations", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 5609, "elapsed": 117.743, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000007", "seed_id": "seed-00132", "prompt_concept": "mutations", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 1275, "elapsed": 40.055, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000008", "seed_id": "seed-00023", "prompt_concept": "continuity", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 2120, "elapsed": 63.622, "cached": false, "error": null, "ensemble": false}

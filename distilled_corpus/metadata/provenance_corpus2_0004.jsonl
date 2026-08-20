@@ -1,0 +1,4 @@
+{"id": "corpus2-000012", "seed_id": "seed-00124", "prompt_concept": "photosynthesis", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5838, "elapsed": 117.684, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000013", "seed_id": "seed-00237", "prompt_concept": "indexes", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5985, "elapsed": 152.21, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000014", "seed_id": "seed-00352", "prompt_concept": "inflation", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1832, "elapsed": 104.553, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000015", "seed_id": "seed-00199", "prompt_concept": "separation processes", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4380, "elapsed": 124.095, "cached": false, "error": null, "ensemble": true}

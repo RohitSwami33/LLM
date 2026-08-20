@@ -1,0 +1,4 @@
+{"id": "corpus2-000016", "seed_id": "seed-00243", "prompt_concept": "memory management", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2544, "elapsed": 50.306, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000017", "seed_id": "seed-00183", "prompt_concept": "Ohm's law", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4454, "elapsed": 104.043, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000018", "seed_id": "seed-00079", "prompt_concept": "uncertainty principle", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2301, "elapsed": 119.5, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000019", "seed_id": "seed-00334", "prompt_concept": "renaissance", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2051, "elapsed": 49.404, "cached": false, "error": null, "ensemble": false}

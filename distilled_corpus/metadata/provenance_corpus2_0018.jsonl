@@ -1,0 +1,4 @@
+{"id": "corpus2-000068", "seed_id": "seed-00039", "prompt_concept": "expectation and variance", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3003, "elapsed": 57.075, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000069", "seed_id": "seed-00033", "prompt_concept": "vector spaces", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1750, "elapsed": 55.208, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000070", "seed_id": "seed-00212", "prompt_concept": "failure analysis", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4017, "elapsed": 176.061, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000071", "seed_id": "seed-00084", "prompt_concept": "spacetime", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4535, "elapsed": 98.404, "cached": false, "error": null, "ensemble": false}

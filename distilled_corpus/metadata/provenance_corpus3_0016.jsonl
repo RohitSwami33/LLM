@@ -1,0 +1,6 @@
+{"id": "corpus3-000060", "seed_id": "seed-00275", "prompt_concept": "cache hierarchy", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 2933, "elapsed": 65.12, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000061", "seed_id": "seed-00232", "prompt_concept": "heaps", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 2734, "elapsed": 132.603, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000065", "seed_id": "seed-00251", "prompt_concept": "sockets", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 885, "elapsed": 49.013, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000066", "seed_id": "seed-00193", "prompt_concept": "structural analysis", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 669, "elapsed": 28.163, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000067", "seed_id": "seed-00167", "prompt_concept": "ocean currents", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 980, "elapsed": 30.882, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000068", "seed_id": "seed-00147", "prompt_concept": "circulatory system", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 10355, "elapsed": 278.805, "cached": false, "error": null, "ensemble": false}

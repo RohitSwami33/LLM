@@ -1,0 +1,4 @@
+{"id": "corpus2-000200", "seed_id": "seed-00355", "prompt_concept": "market structures", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 111.104, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000201", "seed_id": "seed-00015", "prompt_concept": "polygons", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1333, "elapsed": 40.205, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000202", "seed_id": "seed-00132", "prompt_concept": "mutations", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1711, "elapsed": 53.285, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000203", "seed_id": "seed-00121", "prompt_concept": "cell cycle", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 798, "elapsed": 22.009, "cached": true, "error": null, "ensemble": false}

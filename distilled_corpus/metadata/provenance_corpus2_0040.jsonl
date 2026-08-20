@@ -1,0 +1,4 @@
+{"id": "corpus2-000156", "seed_id": "seed-00322", "prompt_concept": "attention mechanisms", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2142, "elapsed": 41.957, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000157", "seed_id": "seed-00268", "prompt_concept": "lexing", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1617, "elapsed": 29.051, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000158", "seed_id": "seed-00328", "prompt_concept": "memory", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1703, "elapsed": 31.714, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000159", "seed_id": "seed-00010", "prompt_concept": "exponents and logarithms", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 158.708, "cached": false, "error": null, "ensemble": false}

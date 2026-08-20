@@ -1,0 +1,4 @@
+{"id": "corpus2-000212", "seed_id": "seed-00188", "prompt_concept": "statics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1654, "elapsed": 43.206, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000213", "seed_id": "seed-00183", "prompt_concept": "Ohm's law", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 151.506, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000214", "seed_id": "seed-00113", "prompt_concept": "DNA and RNA", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4409, "elapsed": 126.359, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000215", "seed_id": "seed-00253", "prompt_concept": "CAP theorem", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4562, "elapsed": 132.417, "cached": false, "error": null, "ensemble": false}

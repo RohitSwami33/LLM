@@ -1,0 +1,4 @@
+{"id": "corpus2-000004", "seed_id": "seed-00081", "prompt_concept": "special relativity", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4253, "elapsed": 160.066, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000005", "seed_id": "seed-00049", "prompt_concept": "set theory", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 138.758, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000006", "seed_id": "seed-00033", "prompt_concept": "vector spaces", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2292, "elapsed": 55.297, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000007", "seed_id": "seed-00360", "prompt_concept": "demographics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 159.248, "cached": false, "error": null, "ensemble": true}

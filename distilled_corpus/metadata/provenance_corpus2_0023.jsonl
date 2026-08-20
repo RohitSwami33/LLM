@@ -1,0 +1,4 @@
+{"id": "corpus2-000088", "seed_id": "seed-00009", "prompt_concept": "inequalities", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3788, "elapsed": 80.975, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000089", "seed_id": "seed-00170", "prompt_concept": "solar system formation", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1906, "elapsed": 61.904, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000090", "seed_id": "seed-00058", "prompt_concept": "kinematics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1724, "elapsed": 28.439, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000091", "seed_id": "seed-00160", "prompt_concept": "rock cycle", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2989, "elapsed": 58.341, "cached": false, "error": null, "ensemble": false}

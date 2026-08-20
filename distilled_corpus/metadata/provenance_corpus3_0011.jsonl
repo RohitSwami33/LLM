@@ -1,0 +1,3 @@
+{"id": "corpus3-000042", "seed_id": "seed-00027", "prompt_concept": "multivariable calculus", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 3286, "elapsed": 122.761, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000044", "seed_id": "seed-00356", "prompt_concept": "social institutions", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 6893, "elapsed": 288.025, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000045", "seed_id": "seed-00150", "prompt_concept": "neurons", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1680, "elapsed": 43.23, "cached": false, "error": null, "ensemble": false}

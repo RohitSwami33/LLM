@@ -1,0 +1,4 @@
+{"id": "corpus2-000252", "seed_id": "seed-00381", "prompt_concept": "health and hygiene", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 5725, "elapsed": 127.419, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000253", "seed_id": "seed-00099", "prompt_concept": "isomerism", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2558, "elapsed": 68.893, "cached": true, "error": null, "ensemble": false}
+{"id": "corpus2-000254", "seed_id": "seed-00153", "prompt_concept": "neural circuits", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 2340, "elapsed": 79.995, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000255", "seed_id": "seed-00327", "prompt_concept": "tool use", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3017, "elapsed": 56.115, "cached": false, "error": null, "ensemble": false}

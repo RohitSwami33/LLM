@@ -1,0 +1,4 @@
+{"id": "corpus2-000048", "seed_id": "seed-00175", "prompt_concept": "telescopes", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3460, "elapsed": 69.778, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000049", "seed_id": "seed-00198", "prompt_concept": "reactor design", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 4767, "elapsed": 137.617, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000050", "seed_id": "seed-00367", "prompt_concept": "literary devices", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3930, "elapsed": 131.361, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000051", "seed_id": "seed-00302", "prompt_concept": "normalization", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1809, "elapsed": 44.108, "cached": false, "error": null, "ensemble": false}

@@ -1,0 +1,3 @@
+{"id": "gen-000021", "seed_id": "seed-00169", "prompt_concept": "marine ecosystems", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 827, "elapsed": 18.564, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000022", "seed_id": "seed-00199", "prompt_concept": "separation processes", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 1483, "elapsed": 35.571, "cached": false, "error": null, "ensemble": false}
+{"id": "gen-000023", "seed_id": "seed-00291", "prompt_concept": "decision trees", "teachers": ["poolside/laguna-s-2.1:free"], "completion_tokens": 1033, "elapsed": 23.191, "cached": false, "error": null, "ensemble": false}

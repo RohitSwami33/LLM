@@ -1,0 +1,3 @@
+{"id": "corpus3-000064", "seed_id": "seed-00066", "prompt_concept": "heat engines", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1551, "elapsed": 79.365, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000069", "seed_id": "seed-00253", "prompt_concept": "CAP theorem", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 1472, "elapsed": 60.652, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus3-000072", "seed_id": "seed-00365", "prompt_concept": "major philosophers", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 341, "elapsed": 9.495, "cached": false, "error": null, "ensemble": false}

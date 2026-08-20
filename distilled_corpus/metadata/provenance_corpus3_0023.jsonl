@@ -1,0 +1,3 @@
+{"id": "corpus3-000093", "seed_id": "seed-00368", "prompt_concept": "major authors", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 5015, "elapsed": 165.812, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000095", "seed_id": "seed-00116", "prompt_concept": "semiconductors", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 932, "elapsed": 71.038, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus3-000096", "seed_id": "seed-00068", "prompt_concept": "Coulomb's law", "teachers": ["z-ai/glm-5.2"], "completion_tokens": 9697, "elapsed": 233.628, "cached": false, "error": null, "ensemble": false}

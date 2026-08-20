@@ -1,0 +1,19 @@
+{
+  "n_documents": 1252,
+  "average_quality_score": 0.701,
+  "verdicts": {
+    "keep": 66,
+    "review": 1186
+  },
+  "verification_notes": [
+    "code_with_explanation items were executed; failing code rejected.",
+    "Independent LLM verifier (GLM-5.2-NVFP4) issued KEEP/REVIEW/REJECT verdicts.",
+    "Heuristics rejected teacher artifacts and too-short outputs.",
+    "See reports/dedup_report.json for duplicate-removal breakdown."
+  ],
+  "known_limitations": [
+    "Pilot scale only; API throughput limited (~50s/call, 504-prone under concurrency).",
+    "Reasoning-model (Qwen/GLM/Kimi) generation limited by latency; bulk pilot used DeepSeek-Flash.",
+    "Semantic dedup uses TF-IDF cosine, not dense embeddings."
+  ]
+}

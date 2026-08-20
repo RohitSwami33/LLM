@@ -1,0 +1,4 @@
+{"id": "corpus2-000024", "seed_id": "seed-00168", "prompt_concept": "tides", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1762, "elapsed": 25.134, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000025", "seed_id": "seed-00068", "prompt_concept": "Coulomb's law", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 6000, "elapsed": 122.238, "cached": false, "error": null, "ensemble": false}
+{"id": "corpus2-000026", "seed_id": "seed-00342", "prompt_concept": "deserts", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 1777, "elapsed": 68.898, "cached": false, "error": null, "ensemble": true}
+{"id": "corpus2-000027", "seed_id": "seed-00205", "prompt_concept": "kinematics", "teachers": ["nvidia/nemotron-3-ultra-550b-a55b"], "completion_tokens": 3392, "elapsed": 57.188, "cached": false, "error": null, "ensemble": true}

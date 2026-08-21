@@ -84,9 +84,9 @@ training:
   grad_accum: 8
 
   scheduler: cosine
-  # total_steps for ~708M tokens at 65,536 tok/step:
-  #   708M / 65,536 ≈ 10,800 steps per epoch
-  total_steps: 10800
+  # total_steps for ~1.7B tokens at 65,536 tok/step:
+  #   1.72B / 65,536 ≈ 26,300 steps per epoch
+  total_steps: 26300
 
   curriculum:
     - context_len: 8192

@@ -1,0 +1,138 @@
+# configs/pretrain_200m_moe.yaml
+# 200M-class MoE (181M total / 105.5M active) — DeepSeek-V4-style
+# Muon optimizer + mHC residual (enable) + CSA/HCA attention (when implemented)
+# Dataset: datasets/train_corpus/corpus.jsonl (615K docs, ~708M tokens)
+
+model:
+  vocab_size: 32768
+  d_model: 768
+  n_layers: 8
+  n_q_heads: 12
+  n_kv_heads: 6
+  head_dim: 64
+  rope_theta: 1000000.0
+  context_len: 32768
+  use_ema: false
+
+  ff:
+    type: deepseek_moe
+    n_shared: 1
+    shared_d_ff: 1536
+    n_routed: 12
+    routed_d_ff: 512
+    top_k: 4
+    capacity_factor: 1.25
+    balance_coef: 0.01
+    z_loss_coef: 0.001
+    jitter_noise: 0.01
+    routing_fn: softmax_topk
+
+  attention:
+    pattern: block_sparse      # switch to "csa"/"hca" once implemented
+    kernel: auto
+    window_size: 8192
+    anchor_size: 128
+    block_size: 256
+    top_blocks: 8
+    chunk_size: 2048
+
+  hybrid:
+    enabled: false
+    attn_layers: []
+
+  mhc:
+    enabled: true              # mHC ON per locked spec
+    n_streams: 4
+    sinkhorn_iters: 20
+
+  yarn:
+    enabled: false
+
+# ── Tokenizer ────────────────────────────────────────────────────────────────
+tokenizer:
+  type: sentencepiece
+  vocab_size: 32768
+  model_path: datasets/train_corpus/tokenizer/tokenizer.model
+
+# ── Dataset ──────────────────────────────────────────────────────────────────
+dataset:
+  path: datasets/train_corpus/corpus.jsonl
+  max_seq_len: 2048           # training context (curriculum extends to 32K)
+  train_split: 0.98
+  val_split: 0.02
+  num_workers: 4
+  pin_memory: true
+  packing: true
+  pack_factor: 4
+
+# ── Training ─────────────────────────────────────────────────────────────────
+training:
+  optimizer: muon_clip          # Muon (DeepSeek-V4 Algorithm 1 style)
+  lr: 0.014
+  lr_1d: 0.007
+  lr_min: 3.0e-5
+  warmup_steps: 600
+  weight_decay: 0.1
+  muon_momentum: 0.95
+  muon_nesterov: true
+  muon_ns_steps: 5
+  qk_clip_tau: 100.0
+  adamw_lr: 3.0e-4
+  grad_clip: 1.0
+  batch_tokens: 65536
+  precision: bf16
+  grad_accum: 8
+
+  scheduler: cosine
+  # total_steps for ~708M tokens at 65,536 tok/step:
+  #   708M / 65,536 ≈ 10,800 steps per epoch
+  total_steps: 10800
+
+  curriculum:
+    - context_len: 8192
+      fraction: 0.5
+      attention_pattern: causal
+    - context_len: 32768
+      fraction: 0.5
+      attention_pattern: block_sparse
+
+  # ── Checkpointing (multi-account resume) ──────────────────────────────────
+  save_every: 500
+  keep_last_n: 3
+  checkpoint_dir: training/checkpoints/200m_moe
+  upload_to_kaggle: true
+  checkpoint_dataset: "tomiokasan/200m-moe-checkpoints"
+
+  log_every: 50
+  tensorboard: true
+  wandb: false
+
+  eval_every: 1000
+  eval_steps: 50
+
+  experiment_dir: experiments
+
+  nan_recovery: true
+  nan_max_retries: 3
+  nan_skip_batches: 10
+
+  spike_detection: true
+  spike_threshold: 2.0
+  spike_window: 100
+  spike_rollback: true
+
+  seed: 42
+
+# ── Evaluation ───────────────────────────────────────────────────────────────
+evaluation:
+  max_new_tokens: 200
+  temperature: 0.8
+  top_k: 50
+  top_p: 0.95
+  num_samples: 5
+  prompts:
+    - "Explain how a transformer learns."
+    - "What is the derivative of x^2?"
+    - "The mitochondria is the powerhouse of"
+    - "Newton's second law states that"
+    - "In quantum mechanics, superposition means"

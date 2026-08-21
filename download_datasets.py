@@ -252,6 +252,7 @@ DATASET_REGISTRY: list[DatasetConfig] = [
         estimated_disk="~27.6 GB (parquet); ~32 GB (arrow)",
         text_column="text",
         extra_columns=["id", "score"],
+        max_samples=300_000,
         preprocess_config={
             "remove_html": True,
             "normalize_unicode": True,
@@ -297,6 +298,66 @@ DATASET_REGISTRY: list[DatasetConfig] = [
         },
     ),
     DatasetConfig(
+        name="finemath",
+        hf_path="HuggingFaceTB/finemath",
+        hf_config="auto",
+        purpose="Mathematical reasoning corpus (FineMath-3+/4+)",
+        estimated_tokens="~3B tokens",
+        estimated_disk="~8-15 GB (parquet)",
+        text_column="text",
+        extra_columns=["id"],
+        max_samples=60_000,
+        preprocess_config={
+            "normalize_unicode": True,
+            "normalize_whitespace": True,
+        },
+    ),
+    DatasetConfig(
+        name="openwebmath",
+        hf_path="open-web-math/open-web-math",
+        hf_config="default",
+        purpose="OpenWebMath: math web text (14B tokens)",
+        estimated_tokens="~14B tokens",
+        estimated_disk="~30 GB (parquet)",
+        text_column="text",
+        extra_columns=["url"],
+        max_samples=60_000,
+        preprocess_config={
+            "normalize_unicode": True,
+            "normalize_whitespace": True,
+        },
+    ),
+    DatasetConfig(
+        name="openstax",
+        hf_path="HuggingFaceTB/openstax_paragraphs",
+        hf_config="default",
+        purpose="OpenStax science textbook paragraphs",
+        estimated_tokens="~200M tokens",
+        estimated_disk="~1 GB (parquet)",
+        text_column="text",
+        extra_columns=["id"],
+        max_samples=40_000,
+        preprocess_config={
+            "normalize_unicode": True,
+            "normalize_whitespace": True,
+        },
+    ),
+    DatasetConfig(
+        name="arxiv",
+        hf_path="open-index/open-arxiv",
+        hf_config="default",
+        purpose="arXiv abstracts + full text (math/physics/cs)",
+        estimated_tokens="~50B tokens",
+        estimated_disk="~100+ GB",
+        text_column="abstract",
+        extra_columns=["id", "title", "categories"],
+        max_samples=50_000,
+        preprocess_config={
+            "normalize_unicode": True,
+            "normalize_whitespace": True,
+        },
+    ),
+    DatasetConfig(
         name="wikipedia",
         hf_path="wikimedia/wikipedia",
         hf_config="auto",
@@ -305,6 +366,7 @@ DATASET_REGISTRY: list[DatasetConfig] = [
         estimated_disk="~6-8 GB (parquet); ~9-12 GB (arrow)",
         text_column="text",
         extra_columns=["id", "title", "url"],
+        max_samples=150_000,
         preprocess_config={
             "normalize_unicode": True,
             "normalize_whitespace": True,
@@ -456,10 +518,11 @@ def _download_single(
         )
 
         streaming = info.mode == "stream"
+        _split = info.splits[0] if len(info.splits) == 1 else info.splits
         dataset = load_dataset(
             info.hf_path,
             name=resolved_config,
-            split=info.splits,
+            split=_split,
             streaming=streaming,
         )
 

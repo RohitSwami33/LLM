@@ -30,10 +30,13 @@ Key constraint discovered empirically: a **68.7M generalist model failed** (PPL
 | **Local GPU** | RTX 5070 Super 12GB | Fast bf16 (~110 TFLOPS), for 68M-300M comfortable, 1B tight, 2B needs quant/offload |
 
 ### Kaggle accounts (multi-account strategy — CRITICAL for continuous training)
-- **`tomiokasan`** (renamed from `roronoazoro3008`, 2026-08) — creds at `~/.kaggle/kaggle.json`, 30h/week GPU quota, verified
-- **Second account** + friends' accounts — each gives more weekly GPU quota
-- **Quota model**: account-level, new accounts start 6h/week until phone + Persona identity verification
+- **`tomiokasan`** — creds at `~/.kaggle/kaggle.json` (main account, key present)
+- **`roronoazoro3008`** — creds at `~/.kaggle2/kaggle.json` (separate SECOND account, key present)
+- ⚠️ NOTE: These are **two separate accounts**, NOT a rename (earlier docs incorrectly said renamed). Each has its own key.
+- Friends' accounts can be added the same way (one `~/.kaggleN/kaggle.json` per account)
+- **Quota model**: account-level; each verified account gets 30h/week GPU; new accounts start 6h/week until phone + Persona identity verification
 - **TPU note**: 2× TPU per account (v2-8 or similar) — potentially 2-4× faster than T4 for this workload
+- **Switching accounts**: `KAGGLE_CONFIG_DIR=~/.kaggle2` (or the account's dir) before running kaggle CLI/SDK
 - **Checkpoint cadence: every 500 steps** (or ~every hour) — upload `resume.pt` + `latest_step.txt` to the shared checkpoint dataset so any account can resume
 
 ### Checkpoint/Resume across accounts (how it works)

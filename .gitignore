@@ -77,3 +77,6 @@ distilled_corpus/metadata/api_cache/
 distilled_corpus/benchmark/
 distilled_corpus/config/
 distilled_corpus/evaluation/
+
+# Local-only context file (contains API keys) — NEVER commit
+llm_research.md

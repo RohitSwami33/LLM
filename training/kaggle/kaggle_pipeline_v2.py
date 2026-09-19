@@ -1,14 +1,20 @@
 #!/usr/bin/env python3
-"""Kaggle kernel for Hybrid-MoE-70M v2 pretraining (32K curriculum).
+"""Kaggle kernel for the 200M MoE (181M total / 105.5M active) pretraining run.
 
-Boot sequence:
-  STEP 0: locate the mounted research-moe-code dataset (research_hybrid package)
-          and add it to sys.path
-  STEP 1: pretokenize the mounted research-v2-corpus -> /kaggle/working/tokenized/
-  STEP 2: train with research_hybrid.train.run() (curriculum 8K -> 32K,
-          MuonClip + QK-Clip, checkpoint resume/upload to research-moe-checkpoints)
+Uses the LOCKED 200M config (configs/pretrain_200m_moe.yaml):
+  - d=768, L=8, GQA 12q/6kv, head_dim 64
+  - DeepSeekMoE: 1 shared (1536) + 12 routed (512), top-k 4
+  - mHC enabled (n_streams 4, sinkhorn 20)
+  - Muon (muon_clip), bf16
+  - Corpus: tomiokasan/train-corpus-200m (corpus.jsonl + tokenizer)
+  - Checkpoints: PP_SAVE_EVERY=500 -> tomiokasan/200m-moe-checkpoints
 
-Local smoke: PP_SMOKE=1 (tiny config, synthetic data, no Kaggle access).
+Boot:
+  STEP 0: assemble research_hybrid from mounted code dataset (or import local)
+  STEP 1: pretokenize mounted corpus -> /kaggle/working/tokenized/
+  STEP 2: train with the 200M config; checkpoint + resume every 500 steps
+
+Local smoke: PP_SMOKE=1 (tiny config, synthetic data, no Kaggle).
 """
 import json
 import os
@@ -19,19 +25,60 @@ from pathlib import Path
 
 import numpy as np
 
-# The training forward's transient peaks (MoE routed activations, attention
-# chunks) leave the CUDA caching allocator's pool fragmented (reserved ~13 GB
-# while only ~3 GB is live). Without expandable segments the loss chunk's 1 GB
-# fp32 softmax temp cannot find a contiguous block -> OOM. Must be set before
-# any CUDA allocation (first torch.cuda call), so do it here at module scope.
 os.environ.setdefault("PYTORCH_ALLOC_CONF", "expandable_segments:True")
 
-CODE_DATASET = "research-moe-code"
+CODE_DATASET = os.environ.get("PP_CODE_DATASET", "research-moe-code")
 PACKAGE_FILES = [
     "__init__.py", "config.py", "model.py", "optim.py", "train.py",
     "attention.py", "transformer.py", "moe.py", "router.py", "experts.py",
     "mamba2.py", "mhc.py", "mla.py", "smoke_test.py", "audit.py",
 ]
+
+# The 200M MoE config (mirrors configs/pretrain_200m_moe.yaml)
+def build_configs():
+    from research_hybrid.config import (
+        AttentionConfig, CurriculumStage, HybridConfig, MHCConfig,
+        ModelConfig, MoEConfig, TrainingConfig,
+    )
+    mc = ModelConfig(
+        vocab_size=32768,
+        d_model=768,
+        n_layers=8,
+        n_q_heads=12,
+        n_kv_heads=6,
+        head_dim=64,
+        rope_theta=1_000_000.0,
+        context_len=32768,
+        use_ema=False,
+        ff=MoEConfig(
+            n_shared=1, shared_d_ff=1536, n_routed=12, routed_d_ff=512,
+            top_k=4, capacity_factor=1.25, balance_coef=0.01,
+            z_loss_coef=0.001, jitter_noise=0.01, routing_fn="softmax_topk",
+        ),
+        attention=AttentionConfig(
+            pattern="block_sparse", kernel="auto", window_size=8192,
+            anchor_size=128, block_size=256, top_blocks=8, chunk_size=2048,
+        ),
+        hybrid=HybridConfig(enabled=False),
+        mhc=MHCConfig(enabled=True, n_streams=4, sinkhorn_iters=20),
+    )
+    tc = TrainingConfig(
+        optimizer="muon_clip",
+        lr=0.014, lr_1d=0.007, lr_min=3.0e-5,
+        warmup_steps=600, weight_decay=0.1,
+        muon_momentum=0.95, muon_nesterov=True, muon_ns_steps=5,
+        qk_clip_tau=None,       # disabled: QK-Clip doubles attention memory (max-logits pass); OOMs T4
+        grad_clip=1.0,
+        batch_tokens=int(os.environ.get("PP_BATCH_TOKENS", "32768")),  # halved from 65536 for T4
+        precision="bf16", grad_accum=8,
+        total_steps=int(os.environ.get("PP_TOTAL_STEPS", "26300")),
+        curriculum=[
+            CurriculumStage(context_len=8192, fraction=0.5, attention_pattern="causal"),
+            CurriculumStage(context_len=32768, fraction=0.5, attention_pattern="block_sparse"),
+        ],
+        seed=1337,
+    )
+    return mc, tc
 
 
 def _ensure_code_package():
@@ -49,8 +96,7 @@ def _ensure_code_package():
             break
     if src is None:
         raise FileNotFoundError(
-            f"research-moe-code dataset not mounted (looked for */{CODE_DATASET} under "
-            "/kaggle/input); add it to the kernel's dataset sources")
+            f"{CODE_DATASET} dataset not mounted; add it to kernel sources")
     dst = Path("/kaggle/working/research_hybrid")
     dst.mkdir(parents=True, exist_ok=True)
     for fname in PACKAGE_FILES:
@@ -59,41 +105,38 @@ def _ensure_code_package():
     print(f"  [code] research_hybrid assembled from {src}")
 
 
-if Path("/kaggle/working").exists():
-    _ensure_code_package()
-else:
-    import research_hybrid  # local dev: import straight from the repo
-
-from research_hybrid.config import ModelConfig, TrainingConfig
-from research_hybrid.train import run
-
-# ---------------- PRETOKENIZE (reuses the v1 pipeline's format) ----------------
-
 def _detect_owner():
     env = os.environ.get("PP_OWNER") or os.environ.get("KAGGLE_USERNAME")
     if env:
         return env
     if os.path.isdir("/kaggle/input/datasets"):
-        for p in sorted(Path("/kaggle/input/datasets").glob("*/research-v2-corpus")):
+        for p in sorted(Path("/kaggle/input/datasets").glob("*/train-corpus-200m")):
             return p.parent.name
     return "tomiokasan"
 
 
 _OWNER = _detect_owner()
-CORPUS_DATASET = f"{_OWNER}/research-v2-corpus"
+CORPUS_DATASET = f"{_OWNER}/train-corpus-200m"
 
 
 def _env_paths():
     if os.path.exists("/kaggle/input"):
+        # Search /kaggle/input for the corpus dataset wherever it mounted
+        # (modern Kaggle mounts at /kaggle/input/<slug>, older at
+        # /kaggle/input/datasets/<owner>/<slug>).
+        candidates = sorted(Path("/kaggle/input").rglob("corpus.jsonl"))
+        if candidates:
+            corpus = candidates[0]
+            tok = corpus.parent / "tokenizer" / "tokenizer.model"
+            if not tok.exists():
+                # tokenizer may be at /kaggle/input/<slug>/tokenizer/tokenizer.model
+                tok = corpus.parent.parent / "tokenizer" / "tokenizer.model"
+            return corpus, tok, Path("/kaggle/working/tokenized")
         return (Path(f"/kaggle/input/datasets/{CORPUS_DATASET}/corpus.jsonl"),
                 Path(f"/kaggle/input/datasets/{CORPUS_DATASET}/tokenizer/tokenizer.model"),
                 Path("/kaggle/working/tokenized"))
-    if os.path.exists("/content"):
-        return (Path("/content/datasets_dl/corpus.jsonl"),
-                Path("/content/datasets_dl/tokenizer/tokenizer.model"),
-                Path("/content/tokenized"))
-    return (Path("datasets/research_v2/corpus.jsonl"),
-            Path("datasets/research_v2/tokenizer/tokenizer.model"),
+    return (Path("datasets/train_corpus/corpus.jsonl"),
+            Path("training/tokenizer/tokenizer.model"),
             Path("tokenized"))
 
 
@@ -133,8 +176,7 @@ def run_pretokenize():
     print(f"Corpus     : {corpus}")
     print(f"Tokenizer  : {tokenizer}")
     print(f"Output dir : {out}")
-    print(f"Vocab      : {vocab}")
-    print(f"Dtype      : {np.dtype(dtype).name}")
+    print(f"Vocab      : {vocab} | Dtype: {np.dtype(dtype).name}")
 
     docs, toks, start = 0, 0, time.time()
     with open(corpus, "r", encoding="utf-8") as fin, \
@@ -166,25 +208,34 @@ def run_pretokenize():
 def main():
     is_kaggle = os.path.exists("/kaggle/working")
     if is_kaggle:
+        _ensure_code_package()
         run_pretokenize()
     else:
-        print("SKIP pretokenize (not a Kaggle runtime); expecting tokens.bin nearby")
+        # local dev: import straight from repo, expect tokens.bin nearby
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-    tc = TrainingConfig()
-    mc = ModelConfig()
-    os.environ.setdefault("PP_MEM_DEBUG", "1")
+    mc, tc = build_configs()
+    # PP_MEM_DEBUG / PP_EMPTY_CACHE default OFF (enable with env for OOM debugging;
+    # both add sync overhead: empty_cache flushes allocator, MEM_DEBUG calls memory_allocated)
+    os.environ.setdefault("PP_SAVE_EVERY", "500")   # checkpoint every 500 steps
+    os.environ.setdefault("PP_EVAL_EVERY", "500")
+    os.environ.setdefault("PP_LOG_EVERY", "25")
+
     print("\n" + "=" * 60)
-    print("STEP 2/2: TRAINING (Hybrid-MoE-70M v2)")
+    print("STEP 2/2: TRAINING (200M MoE — 181M total / 105.5M active)")
     print(f"  optimizer={tc.optimizer} lr={tc.lr}/{tc.lr_1d} steps={tc.total_steps} "
           f"batch_tokens={tc.batch_tokens}")
-    print(f"  curriculum={[(s.context_len, s.attention_pattern, s.fraction)
-                          for s in tc.curriculum]}")
-    print(f"  qk_clip_tau={tc.qk_clip_tau} checkpointing={mc.use_gradient_checkpointing}")
+    curr = " ".join(f"({s.context_len},{s.attention_pattern},{s.fraction})" for s in tc.curriculum)
+    print("  curriculum=" + curr)
+    print(f"  mHC enabled: {mc.mhc.enabled} | save_every=500 (PP_SAVE_EVERY)")
     print("=" * 60)
 
     working = "/kaggle/working" if is_kaggle else "."
     prompts = ["def fibonacci(n):", "The quick brown fox", "import numpy as np",
                "Explain quantum computing", "What is machine learning?"]
+    from research_hybrid.train import run
     run(mc, tc, working=working, prompts=prompts, max_new_tokens=200, temperature=0.8)
+
+
 if __name__ == "__main__":
     main()

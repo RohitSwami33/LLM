@@ -111,8 +111,8 @@ class HybridLM(nn.Module):
         chunk at a time (peak ~1 GB). Checkpointing the whole loop instead
         defeats this (backward recomputes all chunks before backprop).
         """
-        if h.is_cuda:
-            torch.cuda.empty_cache()  # return the fragmented pool to the driver
+        if os.environ.get("PP_EMPTY_CACHE") and h.is_cuda:
+            torch.cuda.empty_cache()
         dbg = os.environ.get("PP_MEM_DEBUG")
         if dbg and h.is_cuda:
             print(f"[loss] h {tuple(h.shape)} {h.dtype} live {torch.cuda.memory_allocated() // 2**20} MB "

@@ -91,30 +91,40 @@ class MHCLayer(nn.Module):
 
     def _coefficients(self, vec: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         # vec: (B, T, n*C); Eq. 7 (flattened) then Eq. 8.
+        # NOTE: dim names: b=batch, t=token, c=C*n (flattened streams),
+        # x/y = stream indices (n), n = stream index for h_pre/h_post.
         z = self.norm(vec)
         h_pre = self.alpha_pre * torch.einsum("btc,cn->btn", z, self.phi_pre) + self.b_pre
         h_post = self.alpha_post * torch.einsum("btc,cn->btn", z, self.phi_post) + self.b_post
+        # phi_res: (C*n, n, n) -> h_res (B, T, x, y); x,y are stream dims
         h_res = self.alpha_res * torch.einsum(
-            "btc,cab->btab", z, self.phi_res.view(self.n * self.d_model, self.n, self.n)
+            "btc,cxy->btxy", z, self.phi_res.view(self.n * self.d_model, self.n, self.n)
         ) + self.b_res
         return torch.sigmoid(h_pre), 2.0 * torch.sigmoid(h_post), _sinkhorn_knopp(h_res, self.sinkhorn_iters)
 
     def forward(self, block: Callable[[torch.Tensor], torch.Tensor], r: torch.Tensor) -> torch.Tensor:
         """r: (B, T, n, C). Returns updated stream R' (Eq. 3)."""
         B, T, n, C = r.shape
-        vec = r.view(B, T, n * C)
+        vec = r.reshape(B, T, n * C)  # reshape (not view): expand() yields non-contiguous
         h_pre, h_post, h_res = self._coefficients(vec)
 
-        block_in = torch.einsum("btn,btc->btc", h_pre, r)          # H^pre · R -> (B,T,C)
-        block_out = block(block_in)                                 # F(·)
+        # block_in: H^pre (B,T,n) · R (B,T,n,C) -> (B,T,C)
+        block_in = torch.einsum("btn,btnc->btc", h_pre, r)
+        block_out = block(block_in)                                 # F(·) -> (B,T,C)
+        # stream_add: H^post (B,T,n) · F (B,T,C) -> (B,T,n,C)
         stream_add = h_post.unsqueeze(-1) * block_out.unsqueeze(2)  # H^post^T · F -> (B,T,n,C)
-        mixed = torch.einsum("btab,btc->btac", h_res, r)            # H^res · R
+        # mixed: H^res (B,T,x,y) · R (B,T,y,C) -> (B,T,x,C)
+        mixed = torch.einsum("btxy,btyc->btxc", h_res, r)           # H^res · R
         return mixed + stream_add
 
     @staticmethod
     def expand(x: torch.Tensor, n: int) -> torch.Tensor:
-        """Initialize the n-stream residual by tiling the input (HC convention)."""
-        return x.unsqueeze(2).expand(-1, -1, n, -1)
+        """Initialize the n-stream residual by tiling the input (HC convention).
+
+        Uses repeat instead of expand so the result is contiguous (expand returns
+        a non-contiguous view that breaks .view()/reshape downstream).
+        """
+        return x.unsqueeze(2).repeat(1, 1, n, 1)
 
     @staticmethod
     def readout(r: torch.Tensor) -> torch.Tensor:

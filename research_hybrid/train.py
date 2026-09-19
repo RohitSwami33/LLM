@@ -141,16 +141,17 @@ def chunked_accuracy(model: HybridLM, h: torch.Tensor, labels: torch.Tensor,
 
 @torch.no_grad()
 def evaluate(model: HybridLM, data: TokenMemmap, device, ema: Optional[EMAWrapper],
-             T: int = 8192, B: int = 4, max_blocks: int = 50, pattern: str = "block_sparse",
+             T: int = 8192, B: int = 2, max_blocks: int = 50, pattern: str = "block_sparse",
              window: int = 8192, anchor: int = 128) -> Dict[str, float]:
     """Val loss / PPL / next-token accuracy over contiguous val blocks.
 
-    Evaluated with the LIVE weights: with decay 0.999 the EMA shadow has a
-    ~1000-step memory, so during the first ~2000 steps of a 4,870-step run the
-    EMA is dominated by the random init (measured: val loss inflated 7.7 -> 19.5
-    at step 500). ``ema`` is kept in the signature for API compatibility only.
+    B=2 @ 8K: B=4 OOMs a 14.5GB T4 (eval runs on top of train-mode memory;
+    _exp_sub fp32 upcast tipped it over at step 3000). ``ema`` is kept in
+    the signature for API compatibility only.
     """
     model.eval()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
     total_loss, total_tok, correct, blocks = 0.0, 0, 0, 0
     try:
         set_attention_mode(model, pattern, window, anchor)
@@ -167,6 +168,8 @@ def evaluate(model: HybridLM, data: TokenMemmap, device, ema: Optional[EMAWrappe
                 break
     finally:
         model.train()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
     if total_tok == 0:
         return {"val_loss": float("inf"), "val_perplexity": float("inf"), "val_accuracy": 0.0}
     avg = total_loss / total_tok
@@ -276,9 +279,9 @@ def _patch_upload_file_name():
         orig = K.KaggleApi._upload_file
 
         def patched(self, file_name, full_path, blob_type, upload_context, quiet,
-                    resources, content_type=None):
+                    resources):
             uf = orig(self, file_name, full_path, blob_type, upload_context, quiet,
-                      resources, content_type)
+                      resources)
             if uf is not None and not getattr(uf, "description", None):
                 uf.description = file_name
             return uf
@@ -417,6 +420,14 @@ def run(model_cfg: Optional[ModelConfig] = None, train_cfg: Optional[TrainingCon
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     gpu_name = torch.cuda.get_device_name(0) if device.type == "cuda" else "cpu"
     print(f"  Device: {device} ({gpu_name})")
+    if device.type == "cuda":
+        try:
+            torch.set_float32_matmul_precision("high")
+            torch.backends.cuda.matmul.allow_tf32 = True
+            torch.backends.cudnn.allow_tf32 = True
+            torch.backends.cudnn.benchmark = True
+        except Exception:
+            pass
 
     torch.manual_seed(tc.seed)
     if torch.cuda.is_available():
@@ -425,6 +436,12 @@ def run(model_cfg: Optional[ModelConfig] = None, train_cfg: Optional[TrainingCon
     model = HybridLM(mc).to(device)
     n_params = sum(p.numel() for p in model.parameters())
     print(f"  Model: {n_params/1e6:.1f}M total, active {model.num_parameters(active=True)/1e6:.1f}M")
+    if os.environ.get("PP_COMPILE") and device.type == "cuda":
+        try:
+            model = torch.compile(model, mode="reduce-overhead")
+            print("  torch.compile enabled (PP_COMPILE=1, reduce-overhead)")
+        except Exception as e:
+            print(f"  torch.compile failed, continuing without it: {type(e).__name__}: {e}")
 
     opt = make_optimizer(model, tc)
     ema = EMAWrapper(model, decay=mc.ema_decay) if mc.use_ema else None
@@ -437,8 +454,15 @@ def run(model_cfg: Optional[ModelConfig] = None, train_cfg: Optional[TrainingCon
         tokens_path = str(working_p / "tokenized" / "tokens.bin")
     if metadata_path is None:
         metadata_path = str(working_p / "tokenized" / "metadata.json")
-    if smoke and not Path(tokens_path).exists():
-        make_synthetic_data(working_p, vocab=mc.vocab_size)
+    if smoke:
+        tp = Path(tokens_path)
+        mp = Path(metadata_path)
+        needs = not tp.exists() or tp.stat().st_size == 0 or not mp.exists()
+        if needs:
+            tp.parent.mkdir(parents=True, exist_ok=True)
+            if tp.exists():
+                tp.unlink()
+            make_synthetic_data(working_p, vocab=mc.vocab_size)
     data = TokenMemmap(tokens_path, metadata_path, seed=tc.seed, vocab=mc.vocab_size)
     print(f"  Data: {data.n_tokens:,} tokens (train {data.n_train:,} / val {data.n_val:,})")
 
@@ -481,10 +505,24 @@ def run(model_cfg: Optional[ModelConfig] = None, train_cfg: Optional[TrainingCon
     eval_every = int(os.environ.get("PP_EVAL_EVERY", "500"))
     log_every = int(os.environ.get("PP_LOG_EVERY", "25"))
     grad_clip = tc.grad_clip
+    # PP_PRECISION=fp16 selects fp16 autocast + GradScaler (T4/P100 Tensor-Core
+    # speed; default bf16 keeps prior behavior). Scaler is CUDA-only.
+    precision = os.environ.get("PP_PRECISION", "bf16")
+    use_fp16 = precision == "fp16" and device.type == "cuda"
+    scaler = torch.amp.GradScaler("cuda", enabled=use_fp16) if device.type == "cuda" else None
+    if use_fp16 and hasattr(opt, "muon_params"):
+        # MuonClip keeps params in muon_params/adamw_params with EMPTY
+        # param_groups, which makes GradScaler.unscale_() a no-op (no inf
+        # checks recorded -> "No inf checks" assert on update; blind inf
+        # detection on step). Expose the params so the scaler sees grads.
+        # MuonClip.step() ignores groups (uses its own lists), so this is safe.
+        # (Plain AdamW already carries params in its groups — nothing to do.)
+        opt.param_groups[0]["params"].extend(opt.muon_params + opt.adamw_params)
 
     print(f"\n{'='*60}\n  TRAINING from step {global_step} to {tc.total_steps}")
     print(f"  Batch tokens: {tc.batch_tokens} | grad clip: {grad_clip} | "
-          f"checkpointing: {mc.use_gradient_checkpointing} | grad accum: {tc.grad_accum}")
+          f"checkpointing: {mc.use_gradient_checkpointing} | grad accum: {tc.grad_accum} | "
+          f"precision: {precision}{' +scaler' if use_fp16 else ''}")
     print(f"{'='*60}\n")
 
     model.train()
@@ -506,17 +544,46 @@ def run(model_cfg: Optional[ModelConfig] = None, train_cfg: Optional[TrainingCon
         x = data.sample_batch(T, B, train=True).to(device)
         total_tokens += x.numel()
 
-        with torch.amp.autocast("cuda", dtype=torch.float16, enabled=device.type == "cuda"):
+        # bf16: range-safe without a scaler (fp16 overflows grads to inf ->
+        # nan weights -> permanent "non-finite loss" loop, seen in v7).
+        # fp16 (PP_PRECISION=fp16): Tensor-Core speed on T4/P100 via GradScaler.
+        amp_dtype = torch.float16 if use_fp16 else torch.bfloat16
+        with torch.amp.autocast("cuda", dtype=amp_dtype, enabled=device.type == "cuda"):
             out = model(x, labels=x, training=True)
             loss = out.loss
         if loss is None or not torch.isfinite(loss):
-            print(f"  !! non-finite loss at step {global_step}; skipping step")
+            print(f"  !! non-finite loss at step {global_step}; skipping step", flush=True)
             opt.zero_grad(set_to_none=True)
+            global_step += 1  # advance past the poisoned batch instead of looping forever
             continue
 
-        loss.backward()
+        if use_fp16:
+            scaler.scale(loss).backward()
+            scaler.unscale_(opt)
+        else:
+            loss.backward()
+        # Guard: if grads went inf/nan, clip + step would poison the weights
+        grads_bad = False
+        for p in model.parameters():
+            if p.grad is not None and not torch.isfinite(p.grad.sum()):
+                grads_bad = True
+                break
+        if grads_bad:
+            print(f"  !! non-finite grads at step {global_step}; skipping step (weights kept)", flush=True)
+            opt.zero_grad(set_to_none=True)
+            if use_fp16:
+                # GradScaler state: unscale_() was already called above, so
+                # update() must run before the next unscale_() or it raises
+                # "unscale_() has already been called" (killed P100 v1 @5500).
+                scaler.update()
+            global_step += 1
+            continue
         torch.nn.utils.clip_grad_norm_(model.parameters(), grad_clip)
-        opt.step()
+        if use_fp16:
+            scaler.step(opt)
+            scaler.update()
+        else:
+            opt.step()
 
         m = lr_mult(global_step, tc)
         if tc.optimizer == "muon_clip":
@@ -568,7 +635,7 @@ def run(model_cfg: Optional[ModelConfig] = None, train_cfg: Optional[TrainingCon
 
         if global_step % eval_every == 0:
             print(f"\n  --- Eval at step {global_step} ---")
-            ev = evaluate(model, data, device, ema, T=8192, B=4, max_blocks=50,
+            ev = evaluate(model, data, device, ema, T=8192, B=2, max_blocks=50,
                           pattern=mc.attention.pattern, window=mc.attention.window_size,
                           anchor=mc.attention.anchor_size)
             print(f"  Val loss: {ev['val_loss']:.4f} | PPL: {ev['val_perplexity']:.2f} "

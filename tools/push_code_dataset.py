@@ -36,9 +36,9 @@ def patch_upload_file_name():
     orig = K.KaggleApi._upload_file
 
     def patched(self, file_name, full_path, blob_type, upload_context, quiet,
-                resources, content_type=None):
+                 resources):
         uf = orig(self, file_name, full_path, blob_type, upload_context, quiet,
-                  resources, content_type)
+                  resources)
         if uf is not None and not getattr(uf, "description", None):
             uf.description = file_name
         return uf

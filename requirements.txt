@@ -18,6 +18,14 @@ PyYAML>=6.0                       # YAML config parsing
 # Preprocessing
 ftfy>=6.1.0                       # Fix text (Unicode repair) – optional
 
+# Fine-tuning (OLMoE SFT, Kaggle T4/T4x2)
+torch>=2.3.0
+transformers>=4.51.0
+peft>=0.11.0
+trl>=0.11.0
+accelerate>=0.30.0
+bitsandbytes>=0.43.0
+
 # Tokenizer training (optional)
 tokenizers>=0.15.0                # Hugging Face Tokenizers
 sentencepiece>=0.2.0              # SentencePiece tokenizer

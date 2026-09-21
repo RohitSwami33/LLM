@@ -49,9 +49,23 @@ def patch_upload_file_name():
 def main():
     patch_upload_file_name()
 
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--with-sft", action="store_true", help="also bundle datasets/sft and kaggle_sft_olmoe.py")
+    args, _ = ap.parse_known_args()
+
     tmp = Path(tempfile.mkdtemp(prefix="rhmoe_code_"))
     for f in sorted((REPO / "research_hybrid").glob("*.py")):
         shutil.copyfile(f, tmp / f.name)
+    if args.with_sft:
+        for p in [REPO / "datasets" / "sft" / "train.jsonl", REPO / "datasets" / "sft" / "val.jsonl"]:
+            if p.exists():
+                shutil.copyfile(p, tmp / p.name)
+                print(f"  bundled {p.name} ({p.stat().st_size/1e6:.2f} MB)")
+        ks = REPO / "training" / "kaggle" / "kaggle_sft_olmoe.py"
+        if ks.exists():
+            shutil.copyfile(ks, tmp / ks.name)
+            print(f"  bundled {ks.name}")
     # Byte-compile every package file so syntax errors can never reach the
     # kernel (they would kill the whole 12h session at boot).
     for f in sorted(tmp.glob("*.py")):

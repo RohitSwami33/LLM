@@ -22,6 +22,21 @@ from pathlib import Path
 os.environ.setdefault("PYTORCH_ALLOC_CONF", "expandable_segments:True")
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
 
+def _bootstrap_deps():
+    need = []
+    for pkg, imp in [("trl","trl"),("peft","peft"),("datasets","datasets"),("accelerate","accelerate")]:
+        try:
+            __import__(imp)
+        except ImportError:
+            need.append(pkg)
+    if need:
+        import subprocess
+        print(f"  [deps] installing {need} ...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-q"] + need +
+                              ["transformers>=4.51", "peft", "trl", "datasets", "accelerate"])
+        print("  [deps] installed")
+_bootstrap_deps()
+
 CODE_DATASET = os.environ.get("PP_CODE_DATASET", "olmoe-sft-code")
 
 def _ensure_code_package():
@@ -51,10 +66,25 @@ def _find_sft_data():
     return None, None
 
 def _load_model_tokenizer(base_id, use_4bit, smoke):
+    # Kaggle image torchao 0.10 breaks peft; upgrade silently (30s) before any peft import
+    if not smoke and not os.environ.get("PP_NO_TORCHAO_UPGRADE"):
+        try:
+            import subprocess as _sp
+            _sp.check_call([sys.executable, "-m", "pip", "install", "-q", "torchao>=0.16"], stdout=_sp.DEVNULL, stderr=_sp.DEVNULL)
+            print("  torchao upgraded for peft")
+        except Exception as e:
+            print(f"  torchao upgrade skipped: {e}")
+            # fallback: neuter the version gate
+            try:
+                import peft.import_utils as _piu2
+                _piu2.is_torchao_available = lambda *a, **k: False
+                import peft.tuners.lora.torchao as _pt
+                _pt.is_torchao_available = lambda *a, **k: False
+            except Exception:
+                pass
     from transformers import AutoTokenizer, OlmoeForCausalLM, BitsAndBytesConfig
     import torch
     n_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
-    # Try flash-attn if installed, else sdpa (faster than eager)
     attn_impl = None
     try:
         import flash_attn  # noqa: F401
@@ -114,6 +144,7 @@ def main():
     ap.add_argument("--bf16", action="store_true", default=True)
     args = ap.parse_args()
 
+    smoke = bool(os.environ.get("PP_SMOKE"))
     import torch as _torch
     _n_gpus = _torch.cuda.device_count() if _torch.cuda.is_available() else 0
     # CUDA speedups (TF32 + autotune) — safe on sm75 T4, no numerics shift
@@ -125,13 +156,14 @@ def main():
             _torch.backends.cudnn.benchmark = True
         except Exception:
             pass
-    # Auto batch for 2×T4 vs 1×T4: bigger micro-batch = better util
+    # T4x2 BF16 7B sharded still OOM at batch 4×2048 (12.7/14.5GB on SDPA v6) — must be conservative
     if args.per_device_batch == 0:
-        args.per_device_batch = 4 if _n_gpus >= 2 else 2
+        args.per_device_batch = 1 if _n_gpus >= 2 else 2
     if args.grad_accum == 0:
-        args.grad_accum = 2 if _n_gpus >= 2 else 4
-
-    smoke = bool(os.environ.get("PP_SMOKE"))
+        args.grad_accum = 8 if _n_gpus >= 2 else 4
+    # Cap seq for T4x2; 2048×4 OOMs SDPA, 1024 is safe and still covers most docs
+    if args.max_seq_len == 2048 and _n_gpus >= 2 and not smoke:
+        args.max_seq_len = 1024
     if smoke and args.max_steps == 0:
         args.max_steps = 5
         args.per_device_batch = 1
@@ -199,7 +231,7 @@ def main():
     target_modules = ["q_proj","k_proj","v_proj","o_proj","gate_proj","up_proj","down_proj","w1","w2","w3","gate"]
     # TRL will filter to existing modules; include both naming conventions
     peft_cfg = LoraConfig(
-        r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=0.05,
+        r=args.lora_r, lora_alpha=args.lora_alpha, lora_dropout=0.0,
         bias="none", task_type="CAUSAL_LM",
         target_modules=target_modules,
     )
@@ -219,7 +251,20 @@ def main():
     except Exception:
         pass
 
-    # SFT Trainer
+    # SFT Trainer — workaround: trl 0.24 _patch_chunked_ce_lm_head crashes on
+    # OLMoE's lm_head (functools.partial) -> AttributeError __func__
+    import trl.trainer.sft_trainer as _sft
+    _orig_patch = getattr(_sft, "_patch_chunked_ce_lm_head", None)
+    if _orig_patch is not None:
+        def _safe_patch(*a, **k):
+            try:
+                return _orig_patch(*a, **k)
+            except AttributeError as e:
+                if "__func__" in str(e):
+                    print(f"  [trl] _patch_chunked_ce_lm_head skipped: {e}")
+                    return
+                raise
+        _sft._patch_chunked_ce_lm_head = _safe_patch
     from trl import SFTTrainer, SFTConfig
 
     max_steps = args.max_steps if args.max_steps > 0 else -1
@@ -242,9 +287,11 @@ def main():
         num_train_epochs=num_epochs,
         max_steps=max_steps,
         max_length=args.max_seq_len,
-        packing=(not smoke),
+        packing=False,
         bf16=(not smoke and args.bf16),
         fp16=False,
+        gradient_checkpointing=True,
+        loss_type="nll",  # chunked_nll needs patched lm_head which OLMoE lacks -> num_valid_tokens crash
         logging_steps=5,
         save_steps=50,
         eval_strategy="steps" if ds_val is not None else "no",

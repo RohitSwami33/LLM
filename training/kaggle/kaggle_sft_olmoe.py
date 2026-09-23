@@ -21,6 +21,10 @@ from pathlib import Path
 
 os.environ.setdefault("PYTORCH_ALLOC_CONF", "expandable_segments:True")
 os.environ.setdefault("TOKENIZERS_PARALLELISM", "false")
+os.environ.setdefault("PYTHONUNBUFFERED", "1")  # stream logs to Kaggle mid-run
+
+def _log(msg):
+    print(msg, flush=True)
 
 def _bootstrap_deps():
     need = []
@@ -31,10 +35,10 @@ def _bootstrap_deps():
             need.append(pkg)
     if need:
         import subprocess
-        print(f"  [deps] installing {need} ...")
+        _log(f"  [deps] installing {need} ...")
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-q"] + need +
                               ["transformers>=4.51", "peft", "trl", "datasets", "accelerate"])
-        print("  [deps] installed")
+        _log("  [deps] installed")
 _bootstrap_deps()
 
 CODE_DATASET = os.environ.get("PP_CODE_DATASET", "olmoe-sft-code")
@@ -48,7 +52,7 @@ def _ensure_code_package():
             if (p / "train.jsonl").exists() or (p / "sft.jsonl").exists():
                 # SFT data is staged flat; nothing to assemble
                 sys.path.insert(0, "/kaggle/working")
-                print(f"  [code] SFT data at {p}")
+                _log(f"  [code] SFT data at {p}")
                 return p
     return None
 
@@ -66,22 +70,14 @@ def _find_sft_data():
     return None, None
 
 def _load_model_tokenizer(base_id, use_4bit, smoke):
-    # Kaggle image torchao 0.10 breaks peft; upgrade silently (30s) before any peft import
-    if not smoke and not os.environ.get("PP_NO_TORCHAO_UPGRADE"):
-        try:
-            import subprocess as _sp
-            _sp.check_call([sys.executable, "-m", "pip", "install", "-q", "torchao>=0.16"], stdout=_sp.DEVNULL, stderr=_sp.DEVNULL)
-            print("  torchao upgraded for peft")
-        except Exception as e:
-            print(f"  torchao upgrade skipped: {e}")
-            # fallback: neuter the version gate
-            try:
-                import peft.import_utils as _piu2
-                _piu2.is_torchao_available = lambda *a, **k: False
-                import peft.tuners.lora.torchao as _pt
-                _pt.is_torchao_available = lambda *a, **k: False
-            except Exception:
-                pass
+    # Kaggle image ships torchao 0.10 which breaks peft's version gate.
+    # We never use torchao — uninstall it (fast, no download) so
+    # is_torchao_available() returns False cleanly.
+    if not smoke and not os.environ.get("PP_NO_TORCHAO_FIX"):
+        import subprocess as _sp
+        r = _sp.run([sys.executable, "-m", "pip", "uninstall", "-y", "torchao"],
+                    capture_output=True, text=True, timeout=120)
+        _log(f"  torchao removed (rc={r.returncode})")
     from transformers import AutoTokenizer, OlmoeForCausalLM, BitsAndBytesConfig
     import torch
     n_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
@@ -91,7 +87,7 @@ def _load_model_tokenizer(base_id, use_4bit, smoke):
         attn_impl = "flash_attention_2"
     except Exception:
         attn_impl = "sdpa"
-    print(f"  Loading {base_id} (4bit={use_4bit}, smoke={smoke}, gpus={n_gpus}, attn={attn_impl}) ...")
+    _log(f"  Loading {base_id} (4bit={use_4bit}, smoke={smoke}, gpus={n_gpus}, attn={attn_impl}) ...")
     tok = AutoTokenizer.from_pretrained(base_id, trust_remote_code=True)
     if tok.pad_token is None:
         tok.pad_token = tok.eos_token
@@ -107,10 +103,10 @@ def _load_model_tokenizer(base_id, use_4bit, smoke):
                 tok_sm.pad_token = tok_sm.eos_token
             tok_sm.padding_side = "right"
             model_sm = AutoModelForCausalLM.from_pretrained(smoke_id, trust_remote_code=True, torch_dtype=torch.float32)
-            print(f"  [smoke] using {smoke_id} instead of {base_id}")
+            _log(f"  [smoke] using {smoke_id} instead of {base_id}")
             return model_sm, tok_sm
         except Exception as e:
-            print(f"  [smoke] fallback failed ({e}), trying base {base_id}")
+            _log(f"  [smoke] fallback failed ({e}), trying base {base_id}")
             model = OlmoeForCausalLM.from_pretrained(base_id, trust_remote_code=True, torch_dtype=torch.float32)
             return model, tok
 
@@ -126,6 +122,28 @@ def _load_model_tokenizer(base_id, use_4bit, smoke):
     else:
         model = OlmoeForCausalLM.from_pretrained(base_id, torch_dtype=torch.bfloat16, device_map=device_map, **common)
     return model, tok
+
+
+def _find_prev_adapter():
+    """Locate a previous session's LoRA adapter (dataset mount or local).
+
+    Looks for adapter_config.json + adapter_model.safetensors either at
+    <mount>/sft_checkpoints/checkpoint-N/ (kernel-output layout) or at the
+    mount root (flat olmoe-adapter-ckpt100 dataset layout).
+    """
+    cands = []
+    if os.path.exists("/kaggle/input"):
+        for d in sorted(Path("/kaggle/input").rglob("adapter_config.json")):
+            root = d.parent
+            if (root / "adapter_model.safetensors").exists():
+                cands.append(root)
+    if not cands:
+        local = Path("backups/olmoe_adapter_ckpt100/sft_checkpoints/checkpoint-100")
+        if (local / "adapter_config.json").exists():
+            cands.append(local)
+    # prefer kernel-output checkpoints (newer) over the flat dataset
+    cands.sort(key=lambda p: (0 if "sft_checkpoints" in str(p) else 1, str(p)))
+    return cands[0] if cands else None
 
 
 def main():
@@ -187,8 +205,8 @@ def main():
     if args.force_4bit and not smoke:
         use_4bit_flag = True
         args.no_4bit = False
-    print(f"  Train: {train_path}  Val: {val_path}")
-    print(f"  Base: {args.base}  smoke={smoke} 4bit={use_4bit_flag} gpus={_n_gpus} batch={args.per_device_batch} accum={args.grad_accum}")
+    _log(f"  Train: {train_path}  Val: {val_path}")
+    _log(f"  Base: {args.base}  smoke={smoke} 4bit={use_4bit_flag} gpus={_n_gpus} batch={args.per_device_batch} accum={args.grad_accum}")
 
     # Optional HF login for private push
     hf_token = os.environ.get("HF_TOKEN") or os.environ.get("HUGGINGFACE_TOKEN")
@@ -196,9 +214,9 @@ def main():
         try:
             from huggingface_hub import login
             login(token=hf_token)
-            print("  HF login OK")
+            _log("  HF login OK")
         except Exception as e:
-            print(f"  HF login failed: {e}")
+            _log(f"  HF login failed: {e}")
 
     model, tok = _load_model_tokenizer(args.base, use_4bit=use_4bit_flag, smoke=smoke)
 
@@ -211,11 +229,11 @@ def main():
         try:
             ds_val = load_dataset("json", data_files=str(val_path), split="train")
         except Exception as e:
-            print(f"  val load failed: {e}")
+            _log(f"  val load failed: {e}")
 
     # Quick stats
     avg_len = sum(len(x["response"]) for x in ds_train) / len(ds_train)
-    print(f"  Dataset: {len(ds_train)} train, {len(ds_val) if ds_val else 0} val, avg response {avg_len:.0f} chars (~{avg_len/4:.0f} tok)")
+    _log(f"  Dataset: {len(ds_train)} train, {len(ds_val) if ds_val else 0} val, avg response {avg_len:.0f} chars (~{avg_len/4:.0f} tok)")
 
     # Pre-format to `text` for SFTTrainer (trl 0.15+: dataset_text_field="text", no formatting_func)
     def _to_text(ex):
@@ -241,11 +259,21 @@ def main():
         try:
             model = prepare_model_for_kbit_training(model)
         except Exception as e:
-            print(f"  prepare k-bit failed: {e}")
+            _log(f"  prepare k-bit failed: {e}")
     if hasattr(model, "config"):
         model.config.use_cache = False
 
-    model = get_peft_model(model, peft_cfg)
+    # Resume from a previous session's adapter if mounted (v10 disk-full crash -> ckpt-100)
+    prev_adapter = None if smoke else _find_prev_adapter()
+    if prev_adapter is not None:
+        _log(f"  Resuming LoRA adapter from {prev_adapter}")
+        # ckpt-100 is already ~0.65 epochs in; one more epoch (~3h on T4x2) fits the deadline
+        if args.epochs == 3.0:
+            args.epochs = 1.0
+        from peft import PeftModel
+        model = PeftModel.from_pretrained(model, str(prev_adapter), is_trainable=True)
+    else:
+        model = get_peft_model(model, peft_cfg)
     try:
         model.print_trainable_parameters()
     except Exception:
@@ -261,7 +289,7 @@ def main():
                 return _orig_patch(*a, **k)
             except AttributeError as e:
                 if "__func__" in str(e):
-                    print(f"  [trl] _patch_chunked_ce_lm_head skipped: {e}")
+                    _log(f"  [trl] _patch_chunked_ce_lm_head skipped: {e}")
                     return
                 raise
         _sft._patch_chunked_ce_lm_head = _safe_patch
@@ -296,7 +324,8 @@ def main():
         save_steps=50,
         eval_strategy="steps" if ds_val is not None else "no",
         eval_steps=50 if ds_val is not None else 500,
-        save_total_limit=3,
+        save_total_limit=2,
+        save_only_model=True,  # v10 died: optimizer.pt ~6GB x 3 ckpts blew the 20GB disk quota
         report_to="none",
         dataset_text_field="text",
         seed=1337,
@@ -310,13 +339,13 @@ def main():
         processing_class=tok,
     )
 
-    print(f"\n  Training: epochs={num_epochs} max_steps={max_steps} batch={args.per_device_batch} accum={args.grad_accum} seq={args.max_seq_len}")
+    _log(f"\n  Training: epochs={num_epochs} max_steps={max_steps} batch={args.per_device_batch} accum={args.grad_accum} seq={args.max_seq_len}")
     trainer.train()
 
     # Save LoRA adapter
     trainer.save_model(output_dir)
     tok.save_pretrained(output_dir)
-    print(f"  Adapter saved to {output_dir}")
+    _log(f"  Adapter saved to {output_dir}")
 
     # Merge for eval/push preview (only if not smoke-quantized path that breaks merge)
     if not smoke:
@@ -325,9 +354,9 @@ def main():
             merged_dir = "/kaggle/working/merged" if is_kaggle else "merged_olmoe"
             merged.save_pretrained(merged_dir)
             tok.save_pretrained(merged_dir)
-            print(f"  Merged model at {merged_dir} ({sum(p.numel() for p in merged.parameters())/1e9:.2f}B params)")
+            _log(f"  Merged model at {merged_dir} ({sum(p.numel() for p in merged.parameters())/1e9:.2f}B params)")
         except Exception as e:
-            print(f"  Merge skipped: {type(e).__name__}: {e}")
+            _log(f"  Merge skipped: {type(e).__name__}: {e}")
 
     # Optional: push to hub if HF_TOKEN and repo set
     repo = os.environ.get("HF_REPO")  # e.g. tomiokasan/OLMoE-1B-7B-Distilled
@@ -337,11 +366,11 @@ def main():
             api = HfApi()
             api.create_repo(repo, exist_ok=True)
             api.upload_folder(folder_path=output_dir, repo_id=repo, commit_message="QLoRA SFT on distilled 1,252 docs")
-            print(f"  Pushed adapter to https://huggingface.co/{repo}")
+            _log(f"  Pushed adapter to https://huggingface.co/{repo}")
         except Exception as e:
-            print(f"  HF push failed: {type(e).__name__}: {e}")
+            _log(f"  HF push failed: {type(e).__name__}: {e}")
 
-    print("\n  SFT complete.")
+    _log("\n  SFT complete.")
 
 if __name__ == "__main__":
     main()

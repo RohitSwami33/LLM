@@ -9,9 +9,9 @@
   "enable_tpu": false,
   "enable_internet": true,
   "dataset_sources": [
-    "tomiokasan/research-moe-code"
+    "tomiokasan/research-moe-code",
+    "tomiokasan/olmoe-adapter-ckpt100"
   ],
-  "competition_sources": [],
   "kernel_sources": [],
   "model_sources": [],
   "keywords": [

@@ -14,4 +14,5 @@ Answer:
 **Model waits for this prompt.**
 
 **Model:** `Qwen/Qwen3.5-4B` vs `RohitSwami33/qwen35-fc-adapter` (190M LoRA r32) — https://huggingface.co/RohitSwami33/qwen35-fc-adapter
-**Kaggle:** https://www.kaggle.com/models/roronoazoro3008/qwen35-fc-adapter (if pushed) — `kaggle datasets download roronoazoro3008/qwen35-fc-adapter`
+**Model Kaggle:** https://www.kaggle.com/datasets/roronoazoro3008/qwen35-fc-adapter — `kaggle datasets download roronoazoro3008/qwen35-fc-adapter`
+**Dataset (fine-tune data):** https://www.kaggle.com/datasets/roronoazoro3008/qwen35-fc-dataset — `kaggle datasets download roronoazoro3008/qwen35-fc-dataset` (25,037 tokenized seqs, 6.58M tokens, eval holdout 774)

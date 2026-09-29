@@ -1,0 +1,12 @@
+{
+  "train_runtime": 1527.927,
+  "train_samples_per_second": 10.753,
+  "train_steps_per_second": 1.344,
+  "total_flos": 6.099593441814528e+16,
+  "train_loss": 0.03882666680863909,
+  "epoch": 1.0,
+  "examples": 16430,
+  "base": "Qwen/Qwen3.5-4B",
+  "quantization": "NF4 4-bit",
+  "max_length": 768
+}

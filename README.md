@@ -4,6 +4,33 @@ A production-ready, configurable dataset pipeline for LLM pretraining and
 post-training research. Supports **Transformer**, **Mamba**,
 **Transformer+Mamba Hybrid**, **HRM**, and **TRM** architectures.
 
+## Qwen3.5-4B Post-Training Benchmark
+
+The latest evaluation compares the base model, the completed Replay-v3 adapter,
+and the partially trained ORPO-v4 adapter at checkpoint 500/1250. All values are
+accuracy-style selected metrics. Changes are absolute percentage points (pp).
+
+| Benchmark | Base | Replay-v3 | Partial ORPO-v4 | Change vs Base | Change vs V3 |
+|---|---:|---:|---:|---:|---:|
+| MMLU-Pro Computer Science | 0.00% | 20.00% | **30.00%** | **+30.00 pp** | **+10.00 pp** |
+| TruthfulQA MC2 | **57.38%** | 48.50% | 44.64% | **-12.74 pp** | **-3.86 pp** |
+| GSM8K | 0.00% | 40.00% | **70.00%** | **+70.00 pp** | **+30.00 pp** |
+| HellaSwag | **70.00%** | 40.00% | 50.00% | -20.00 pp | **+10.00 pp** |
+| BBH Logical Deduction | 30.00% | 30.00% | 30.00% | 0.00 pp | 0.00 pp |
+| IFEval | 22.22% | **27.78%** | 22.22% | 0.00 pp | -5.56 pp |
+| ARC Challenge | 30.00% | **40.00%** | **40.00%** | **+10.00 pp** | 0.00 pp |
+| **Selected-metric average** | **29.94%** | **35.18%** | **40.98%** | **+11.04 pp** | **+5.80 pp** |
+
+The partial ORPO checkpoint improved the selected-metric average by 11.04 points
+over Base and 5.80 points over Replay-v3. Its strongest gains were on GSM8K and
+MMLU-Pro Computer Science. TruthfulQA regressed, so hallucination and
+truthfulness remain unresolved targets for the next training stage.
+
+These are screening results with only 10 sampled examples per task, not official
+full-dataset scores. ORPO-v4 is incomplete and training is currently stopped at
+checkpoint 500. See the [full comparison](qwen35_post_training/PARTIAL_ORPO_CHECKPOINT500_COMPARISON.md)
+and [raw benchmark output](qwen35_post_training/benchmarks/v4-orpo-checkpoint500-limit10.json).
+
 ## Directory Structure
 
 ```

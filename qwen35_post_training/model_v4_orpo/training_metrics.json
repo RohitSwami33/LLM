@@ -1,0 +1,16 @@
+{
+  "train_runtime": 7923.3649,
+  "train_samples_per_second": 1.262,
+  "train_steps_per_second": 0.158,
+  "total_flos": 0.0,
+  "train_loss": 0.6867752044677734,
+  "epoch": 1.0,
+  "examples": 10000,
+  "base": "Qwen/Qwen3.5-4B",
+  "initial_adapter": "C:\\Users\\vedant\\Documents\\Codex\\2026-09-28\\rtx-4070-super-run-benchmark-py\\outputs\\qwen35-fc-science-replay-v3\\final_adapter",
+  "quantization": "NF4 4-bit",
+  "method": "ORPO",
+  "beta": 0.05,
+  "learning_rate": 2e-06,
+  "max_length": 384
+}

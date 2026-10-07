@@ -4,32 +4,41 @@ A production-ready, configurable dataset pipeline for LLM pretraining and
 post-training research. Supports **Transformer**, **Mamba**,
 **Transformer+Mamba Hybrid**, **HRM**, and **TRM** architectures.
 
-## Qwen3.5-4B Post-Training Benchmark
+## Qwen3.5-4B Post-Training Benchmark (Full Training)
 
-The latest evaluation compares the base model, the completed Replay-v3 adapter,
-and the partially trained ORPO-v4 adapter at checkpoint 500/1250. All values are
-accuracy-style selected metrics. Changes are absolute percentage points (pp).
+Full-training results for the completed ORPO-v4 adapter. All variants use the same NF4 configuration, deterministic decoding, task prompts and sampled items. The 7-task table is a screening run with 10 examples per task, not publication-quality scores.
 
-| Benchmark | Base | Replay-v3 | Partial ORPO-v4 | Change vs Base | Change vs V3 |
+| Benchmark | Base | Old adapter | Science-v2 | Replay-v3 | ORPO-v4 Final |
 |---|---:|---:|---:|---:|---:|
-| MMLU-Pro Computer Science | 0.00% | 20.00% | **30.00%** | **+30.00 pp** | **+10.00 pp** |
-| TruthfulQA MC2 | **57.38%** | 48.50% | 44.64% | **-12.74 pp** | **-3.86 pp** |
-| GSM8K | 0.00% | 40.00% | **70.00%** | **+70.00 pp** | **+30.00 pp** |
-| HellaSwag | **70.00%** | 40.00% | 50.00% | -20.00 pp | **+10.00 pp** |
-| BBH Logical Deduction | 30.00% | 30.00% | 30.00% | 0.00 pp | 0.00 pp |
-| IFEval | 22.22% | **27.78%** | 22.22% | 0.00 pp | -5.56 pp |
-| ARC Challenge | 30.00% | **40.00%** | **40.00%** | **+10.00 pp** | 0.00 pp |
-| **Selected-metric average** | **29.94%** | **35.18%** | **40.98%** | **+11.04 pp** | **+5.80 pp** |
+| MMLU-Pro Computer Science | 0.00% | 10.00% | 0.00% | 20.00% | **30.00%** |
+| TruthfulQA MC2 | **57.38%** | 49.24% | 49.31% | 48.50% | 43.86% |
+| GSM8K | 0.00% | 40.00% | 0.00% | 40.00% | **60.00%** |
+| HellaSwag | **70.00%** | 40.00% | 60.00% | 40.00% | 50.00% |
+| BBH Logical Deduction (5 objects) | **30.00%** | 20.00% | 10.00% | **30.00%** | 20.00% |
+| IFEval | 22.22% | 22.22% | 22.22% | **27.78%** | 22.22% |
+| ARC Challenge | 30.00% | **40.00%** | 30.00% | **40.00%** | **40.00%** |
+| **Selected-metric average** | 29.94% | 31.64% | 24.51% | 35.18% | **38.01% (+8.07 pp vs Base)** |
 
-The partial ORPO checkpoint improved the selected-metric average by 11.04 points
-over Base and 5.80 points over Replay-v3. Its strongest gains were on GSM8K and
-MMLU-Pro Computer Science. TruthfulQA regressed, so hallucination and
-truthfulness remain unresolved targets for the next training stage.
+Final ORPO-v4 improved the selected-metric average by +8.07 pp over Base and +2.83 pp over Replay-v3. Strongest gains were GSM8K (0% → 60%) and MMLU-Pro CS (0% → 30%). TruthfulQA regressed (57.38% → 43.86%), so truthfulness remains unresolved.
 
-These are screening results with only 10 sampled examples per task, not official
-full-dataset scores. ORPO-v4 is incomplete and training is currently stopped at
-checkpoint 500. See the [full comparison](qwen35_post_training/PARTIAL_ORPO_CHECKPOINT500_COMPARISON.md)
-and [raw benchmark output](qwen35_post_training/benchmarks/v4-orpo-checkpoint500-limit10.json).
+See the [full comparison](qwen35_post_training/FINAL_POST_TRAINING_COMPARISON.md) and [raw final output](qwen35_post_training/benchmarks/v4-orpo-limit10.json).
+
+### Paired 50-example check: GSM8K + IFEval (Base vs Final ORPO-v4)
+
+Fifty real examples per task, seed 42, identical items for both models. Original Qwen3.5-4B vs local final ORPO-v4, NF4 4-bit, greedy decoding, 256-token cap. GSM8K 5-shot, IFEval 0-shot. Budget-constrained screening, not published full scores.
+
+| Task / metric | Base Qwen | Final ORPO-v4 | Change |
+|---|---:|---:|---:|
+| GSM8K flexible accuracy | 6.00% | **66.00%** | **+60.00 pp** |
+| GSM8K strict format accuracy | 0.00% | **60.00%** | **+60.00 pp** |
+| IFEval prompt-level strict | 14.00% | 14.00% | 0.00 pp |
+| IFEval instruction-level strict | 30.67% | 30.67% | 0.00 pp |
+| IFEval prompt-level loose | 14.00% | **18.00%** | **+4.00 pp** |
+| IFEval instruction-level loose | 30.67% | **33.33%** | **+2.67 pp** |
+
+GSM8K shows a large paired gain; IFEval is flat on strict, small gain on loose. n=50 still has substantial sampling uncertainty.
+
+See the [paired report](qwen35_post_training/quick_remaining_benchmarks/QUICK_REMAINING_COMPARISON.md) and raw outputs in `qwen35_post_training/quick_remaining_benchmarks/` (`base-gsm8k-n50.json`, `adapter-gsm8k-n50.json`, `base-ifeval-n50.json`, `adapter-ifeval-n50.json`).
 
 ## Directory Structure
 

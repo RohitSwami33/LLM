@@ -21,6 +21,19 @@ env/
 *.swo
 *~
 
+# Android / Gradle (local build outputs, SDK paths, secrets)
+.gradle/
+.cxx/
+local.properties
+*.hprof
+*.jks
+*.keystore
+google-services.json
+
+# Secrets / local env — NEVER commit
+.env
+.env.*
+
 # OS
 .DS_Store
 Thumbs.db
@@ -29,6 +42,15 @@ Thumbs.db
 *.pt
 *.pth
 *.ckpt
+
+# Model weights / exports (GBs — never push; adapters already tracked via LFS stay tracked)
+*.gguf
+*.safetensors
+*.bin
+model_export/*.gguf
+model_export/*.safetensors
+model_export/Qwen3.5-4B/
+model_export/*merged*/
 
 # Data (large files — track with git-lfs or exclude)
 datasets/

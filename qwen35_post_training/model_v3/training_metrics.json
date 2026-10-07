@@ -1,0 +1,16 @@
+{
+  "train_runtime": 2652.0241,
+  "train_samples_per_second": 4.524,
+  "train_steps_per_second": 0.566,
+  "total_flos": 5.991787104097075e+16,
+  "train_loss": 0.08716300964355468,
+  "epoch": 1.0,
+  "examples": 11999,
+  "new_examples": 4000,
+  "replay_examples": 7999,
+  "initial_adapter": "C:\\Users\\vedant\\Documents\\Codex\\2026-09-28\\rtx-4070-super-run-benchmark-py\\work\\LLM-clean\\github_benchmark\\model_weights\\fc_adapter",
+  "base": "Qwen/Qwen3.5-4B",
+  "quantization": "NF4 4-bit",
+  "max_length": 768,
+  "learning_rate": 5e-06
+}

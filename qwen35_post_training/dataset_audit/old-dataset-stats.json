@@ -1,0 +1,38 @@
+{
+  "model_template": "Qwen/Qwen3.5-4B",
+  "sources": {
+    "gsm8k": "openai/gsm8k",
+    "fever": "fever-mirror",
+    "averitec": null,
+    "hotpot": "hotpotqa",
+    "toolace": "Team-ACE/ToolACE",
+    "smoltalk": "smoltalk/everyday",
+    "smoltalk_explain": null,
+    "openr1": "open-r1/OpenR1-Math-220k"
+  },
+  "formatted_counts": {
+    "hotpot_multihop": 9000,
+    "fever_factcheck": 0,
+    "toolace_tooluse": 0,
+    "gsm8k_math": 5500,
+    "openr1_math": 2500,
+    "smoltalk_qa": 2000,
+    "synth_search_decision": 4500,
+    "synth_hallucination": 1840,
+    "synth_self_correction": 500
+  },
+  "train_trajectories": 25037,
+  "eval_holdout": 774,
+  "tokenized_sequences": 25037,
+  "dropped_tokenization": 0,
+  "total_tokens_M": 6.58,
+  "train_loss_tokens_M": 2.89,
+  "categories_pct": {
+    "search_call": 52.7,
+    "math_replay": 4.9,
+    "normal_qa": 33.7,
+    "search_decision_no": 8.7
+  },
+  "max_len": 3072,
+  "seed": 1337
+}

@@ -4,6 +4,111 @@ A production-ready, configurable dataset pipeline for LLM pretraining and
 post-training research. Supports **Transformer**, **Mamba**,
 **Transformer+Mamba Hybrid**, **HRM**, and **TRM** architectures.
 
+## Qwen3.5-4B Post-Training Benchmark (Full Training)
+
+Full-training results for the completed ORPO-v4 adapter. All variants use the same NF4 configuration, deterministic decoding, task prompts and sampled items. The 7-task table is a screening run with 10 examples per task, not publication-quality scores.
+
+| Benchmark | Base | Old adapter | Science-v2 | Replay-v3 | ORPO-v4 Final |
+|---|---:|---:|---:|---:|---:|
+| MMLU-Pro Computer Science | 0.00% | 10.00% | 0.00% | 20.00% | **30.00%** |
+| TruthfulQA MC2 | **57.38%** | 49.24% | 49.31% | 48.50% | 43.86% |
+| GSM8K | 0.00% | 40.00% | 0.00% | 40.00% | **60.00%** |
+| HellaSwag | **70.00%** | 40.00% | 60.00% | 40.00% | 50.00% |
+| BBH Logical Deduction (5 objects) | **30.00%** | 20.00% | 10.00% | **30.00%** | 20.00% |
+| IFEval | 22.22% | 22.22% | 22.22% | **27.78%** | 22.22% |
+| ARC Challenge | 30.00% | **40.00%** | 30.00% | **40.00%** | **40.00%** |
+| **Selected-metric average** | 29.94% | 31.64% | 24.51% | 35.18% | **38.01% (+8.07 pp vs Base)** |
+
+Final ORPO-v4 improved the selected-metric average by +8.07 pp over Base and +2.83 pp over Replay-v3. Strongest gains were GSM8K (0% → 60%) and MMLU-Pro CS (0% → 30%). TruthfulQA regressed (57.38% → 43.86%), so truthfulness remains unresolved.
+
+See the [full comparison](qwen35_post_training/FINAL_POST_TRAINING_COMPARISON.md) and [raw final output](qwen35_post_training/benchmarks/v4-orpo-limit10.json).
+
+### Paired 50-example check: GSM8K + IFEval (Base vs Final ORPO-v4)
+
+Fifty real examples per task, seed 42, identical items for both models. Original Qwen3.5-4B vs local final ORPO-v4, NF4 4-bit, greedy decoding, 256-token cap. GSM8K 5-shot, IFEval 0-shot. Budget-constrained screening, not published full scores.
+
+| Task / metric | Base Qwen | Final ORPO-v4 | Change |
+|---|---:|---:|---:|
+| GSM8K flexible accuracy | 6.00% | **66.00%** | **+60.00 pp** |
+| GSM8K strict format accuracy | 0.00% | **60.00%** | **+60.00 pp** |
+| IFEval prompt-level strict | 14.00% | 14.00% | 0.00 pp |
+| IFEval instruction-level strict | 30.67% | 30.67% | 0.00 pp |
+| IFEval prompt-level loose | 14.00% | **18.00%** | **+4.00 pp** |
+| IFEval instruction-level loose | 30.67% | **33.33%** | **+2.67 pp** |
+
+GSM8K shows a large paired gain; IFEval is flat on strict, small gain on loose. n=50 still has substantial sampling uncertainty.
+
+See the [paired report](qwen35_post_training/quick_remaining_benchmarks/QUICK_REMAINING_COMPARISON.md) and raw outputs in `qwen35_post_training/quick_remaining_benchmarks/` (`base-gsm8k-n50.json`, `adapter-gsm8k-n50.json`, `base-ifeval-n50.json`, `adapter-ifeval-n50.json`).
+
+## Qwen3.5-4B Post-Training: What We Did for Training
+
+Goal: reduce hallucinations and improve factual / science QA on `Qwen/Qwen3.5-4B` without losing math and reasoning, on a single 12 GB GPU.
+
+- Base: `Qwen/Qwen3.5-4B`, NF4 4-bit (`bnb_4bit_quant_type=nf4`, double-quant, `bfloat16` compute, `sdpa`), `trust_remote_code=True`
+- GPU: NVIDIA RTX 4070 SUPER 12 GB, CUDA, `allow_tf32=True`, batch 1
+- Method: QLoRA SFT → replay continuation → reference-free ORPO preference training, LoRA only
+- Code: `qwen35_post_training/training/` (`build_science_sft.py`, `build_preference_data.py`, `train_4bit_qlora.py`, `train_orpo_4bit.py`)
+- Eval: `qwen35_post_training/benchmarks/run_real_benchmarks.py` with `lm-evaluation-harness`, 7 tasks, deterministic greedy decoding, seed 42
+
+### Stage 0 — Starting point: old fact-check adapter
+
+- Public adapter: `RohitSwami33/qwen35-fc-adapter`, continued in later stages via `--init-adapter`
+- Released cache: 25,037 sequences, 6.58M total tokens, 2.89M supervised tokens, `max_len=3072`, seed 1337
+- Mixture: HotpotQA 9,000 + GSM8K 5,500 + OpenR1-Math 2,500 + SmolTalk 2,000 + synthetic search decisions 4,500 + synthetic hallucinations 1,840 + synthetic self-corrections 500; FEVER / AVeriTeC / ToolACE 0 rows in build
+- Audit: `qwen35_post_training/dataset_audit/old-dataset-stats.json`
+
+### Stage 1 — Science-v2 fresh QLoRA (did not help)
+
+- Data: `training/build_science_sft.py` from train splits only — SciQ + PubMedQA `pqa_labeled` + OpenBookQA `main`, grounded in support passages, exact-text deduped, shuffled seed 3407
+- Size: 16,430 usable examples, `max_length=768`, 1 epoch, 2,054 steps
+- QLoRA: `r=16`, `alpha=32`, dropout 0.05, targets `q/k/v/o/gate/up/down_proj`, `paged_adamw_8bit`, cosine, warmup 50, `per_device=1`, `grad_accum=8`, `weight_decay=0.01`, `max_grad_norm=1.0`, `bf16/tf32`, gradient checkpointing
+- Result: loss 0.03883, 1,528s, 10.75 samples/s — but screening regressed (avg 24.51% vs Base 29.94%)
+- Lesson: SFT loss rewards imitation, not truthfulness; narrow data overwrote general behavior
+- Metrics: `qwen35_post_training/model_science_v2/training_metrics.json`
+
+### Stage 2 — Replay-v3 continuation (kept math, small gain)
+
+- Init: old `fc_adapter` (not science-v2), low LR `5e-6`
+- Data: 4,000 grounded science + 8,000 old-cache replay (7,999 used, 11,999 total), `max_length=768`, token-based prompt masking (`labels=-100` on prompt)
+- Result: loss 0.08716, 2,652s, 4.52 samples/s, 1 epoch — screening avg 35.18% (+5.24 pp vs Base)
+- Metrics: `qwen35_post_training/model_v3/training_metrics.json`
+- Reproduce:
+```powershell
+python qwen35_post_training/training/train_4bit_qlora.py `
+  --data path/to/science_sft.jsonl --limit 4000 `
+  --replay-cache path/to/tokenized_cache --replay-limit 8000 `
+  --init-adapter path/to/fc_adapter --learning-rate 5e-6 `
+  --max-length 768 --output outputs/qwen35-fc-science-replay-v3
+```
+
+### Stage 3 — ORPO-v4 preference training (final adapter)
+
+- Data: `training/build_preference_data.py` → 10,000 grounded chosen/rejected pairs, seed 7301: HaluEval-QA 5,200 + SciQ 2,500 + OpenBookQA 1,500 + PubMedQA 800. Chosen = evidence-grounded answer, rejected = hallucinated / overconfident answer
+- Init: Replay-v3 `final_adapter`, ORPO `beta=0.05`, LR `2e-6`, cosine, warmup 40, batch 1x8, `max_completion_length=256`
+- VRAM trick on 12 GB: fresh run `max_length=768`, resume with `max_length=384` so optimizer state fits; smoke-tested with 16 examples / 1 step first
+- LoRA: `r=32`, `alpha=64`, dropout 0.05, targets `q/k/v/o/out/down/up/gate_proj`
+- Result: loss 0.68678, 7,923s (~2.2h), 1.26 samples/s, 1 epoch, 10k examples — final screening avg 38.01% (+8.07 pp vs Base)
+- Metrics: `qwen35_post_training/model_v4_orpo/training_metrics.json`, adapter: `qwen35_post_training/model_v4_orpo/`
+- Pipeline: `work/run_final_preference_pipeline.py` trains → benchmarks limit-10 → writes `FINAL_POST_TRAINING_COMPARISON.md` → copies adapter + report into repo → pushes
+- Reproduce:
+```powershell
+python qwen35_post_training/training/train_orpo_4bit.py `
+  --data path/to/preference_10k.jsonl `
+  --init-adapter path/to/replay-v3/final_adapter `
+  --output outputs/qwen35-factual-orpo-v4 `
+  --max-length 768 --learning-rate 2e-6 --beta 0.05
+```
+
+### How evaluation was run
+
+- Runner: `qwen35_post_training/benchmarks/run_real_benchmarks.py` (`--variant base|adapter`, `--limit`, `--max-gen-toks 256`, `--tasks`, seed 42)
+- 7-task screening: `mmlu_pro_computer_science`, `truthfulqa_mc2`, `gsm8k`, `hellaswag`, `bbh_cot_zeroshot_logical_deduction_five_objects`, `ifeval`, `arc_challenge`, `limit=10`, batch 1, `apply_chat_template`, greedy, logs VRAM + wall time
+- Paired n50: `work/run_quick_remaining_comparison.py` — same 50 real GSM8K/IFEval items (seed 42) for both models, hash-checked, per-response cache, 256-token cap
+- Full suite (resumable, HellaSwag excluded): `work/run_full_v4_suite.py` (`--limit 0`, manifest + skip-completed)
+- Stack: PyTorch CUDA, Transformers, PEFT 0.21.0, bitsandbytes, Datasets, Accelerate, TRL ORPO, lm-evaluation-harness
+
+Limitations: n=10 / n=50 are noisy screening runs, 256-token cap truncates long reasoning, TruthfulQA still regressed — do not claim broad improvement without larger held-out eval.
+
 ## Directory Structure
 
 ```

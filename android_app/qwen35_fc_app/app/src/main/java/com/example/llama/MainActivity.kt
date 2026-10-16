@@ -476,6 +476,7 @@ class MainActivity : AppCompatActivity() {
                 result.startsWith("No web results found")
             followUp = if (webDown) {
                 " \n$result\n \n" +
+                    "The user's original message was exactly: \"$userMsg\". " +
                     "The web search tool isn't available right now. If " +
                     "you know the answer from your own knowledge, answer " +
                     "in 2-4 plain sentences. If you do not know it, reply " +
@@ -484,7 +485,8 @@ class MainActivity : AppCompatActivity() {
                     "isn't available right now."
             } else {
                 " \n$result\n \n" +
-                    "Answer the user's ORIGINAL message using this result. If " +
+                    "The user's original message was exactly: \"$userMsg\". " +
+                    "Answer THAT message using this result. If " +
                     "it was a question, start with the direct answer and give " +
                     "2-4 plain sentences (entity first, then relevant " +
                     "details). If it was a claim, open with exactly one " +

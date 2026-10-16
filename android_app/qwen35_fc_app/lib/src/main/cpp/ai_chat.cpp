@@ -1,5 +1,6 @@
 #include <android/log.h>
 #include <jni.h>
+#include <dlfcn.h>
 #include <iomanip>
 #include <cmath>
 #include <string>
@@ -25,19 +26,30 @@ static std::string join(const std::vector<T> &values, const std::string &delim) 
  * LLama resources: context, model, batch and sampler
  */
 constexpr int   N_THREADS_MIN           = 2;
-constexpr int   N_THREADS_MAX           = 4;
-constexpr int   N_THREADS_HEADROOM      = 2;
+// big-core thread cap: Prime + Performance clusters only (thermal safety)
+constexpr int   N_THREADS_CAP           = 6;
 
 constexpr int   DEFAULT_CONTEXT_SIZE    = 8192;
 constexpr int   OVERFLOW_HEADROOM       = 4;
+
+// TurboQuant-style KV cache compression (llama.cpp already applies the
+// Walsh-Hadamard orthonormal rotation to K and V before quantizing —
+// see llama-kv-cache.cpp attn_rot_k/attn_rot_v — which is the core of the
+// TurboQuant paper, arXiv:2504.19874).
+// NOTE: TQ1_0/TQ2_0 need n_embd_head_k % 256 == 0 and are rejected by
+// llama-context on Qwen3.5 (head dim 128), so use q4_0 (K) + q8_0 (V).
+constexpr bool  KV_CACHE_QUANTIZED  = true;
+constexpr auto  KV_TYPE_K           = GGML_TYPE_Q4_0;
+constexpr auto  KV_TYPE_V           = GGML_TYPE_Q8_0;
 constexpr int   BATCH_SIZE              = 512;
 constexpr float DEFAULT_SAMPLER_TEMP    = 0.3f;
 
-static llama_model                      * g_model;
-static llama_context                    * g_context;
+static llama_model                      * g_model = nullptr;
+static llama_context                    * g_context = nullptr;
 static llama_batch                        g_batch;
+static bool                               g_batch_init = false;
 static common_chat_templates_ptr          g_chat_templates;
-static common_sampler                   * g_sampler;
+static common_sampler                   * g_sampler = nullptr;
 
 extern "C"
 JNIEXPORT void JNICALL
@@ -73,17 +85,117 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_load(JNIEnv *env, jobject, jstr
     return 0;
 }
 
+// big-core detection: probe per-core max freq (kHz) from sysfs, select every
+// core faster than the slowest detected core (drops efficiency cores on
+// 1+3+4 / 1+5+2 SoCs), cap the count, fall back to a safe cap when sysfs is
+// unreadable or all cores match. Selection logic unit-tested in
+// cpu_kernels/b6_threads.cpp - keep in sync with that copy.
+static std::vector<int> cpu_max_freqs(int ncpu) {
+    std::vector<int> freqs(ncpu, 0);
+    for (int i = 0; i < ncpu; i++) {
+        char path[96];
+        snprintf(path, sizeof(path), "/sys/devices/system/cpu/cpu%d/cpufreq/cpuinfo_max_freq", i);
+        FILE *f = fopen(path, "r");
+        int khz = 0;
+        if (f) {
+            if (fscanf(f, "%d", &khz) == 1) { freqs[i] = khz; }
+            fclose(f);
+        }
+    }
+    return freqs;
+}
+
+static int select_big_cores(const std::vector<int> &freqs, std::vector<bool> &mask, int cap) {
+    const int ncpu = (int) freqs.size();
+    int min_f = -1, max_f = -1;
+    for (int f : freqs) {
+        if (f > 0) {
+            if (min_f < 0 || f < min_f) { min_f = f; }
+            if (max_f < 0 || f > max_f) { max_f = f; }
+        }
+    }
+    for (int i = 0; i < ncpu; i++) { mask[i] = false; }
+    int n = 0;
+    if (min_f > 0 && max_f > min_f) {
+        for (int i = 0; i < ncpu; i++) {
+            if (freqs[i] > min_f) { mask[i] = true; n++; }
+        }
+        // over cap: drop the slowest selected cores
+        while (n > cap) {
+            int slow = -1;
+            for (int i = 0; i < ncpu; i++) {
+                if (mask[i] && (slow < 0 || freqs[i] < freqs[slow])) { slow = i; }
+            }
+            if (slow < 0) { break; }
+            mask[slow] = false;
+            n--;
+        }
+    } else {
+        n = std::min(cap, ncpu);
+        for (int i = 0; i < n; i++) { mask[i] = true; }
+    }
+    return std::max(1, n);
+}
+
+// big-core pin mask captured by init_context; inference threads re-pin at
+// entry so every worker factions inherits the fast-core mask
+static std::vector<bool> g_cpus_pin;
+
+// pin the calling thread to the big-core mask; android worker threads
+// inherit affinity at creation, so all ggml workers stay on fast cores
+static void pin_big_cores(const std::vector<bool> & cpumask) {
+#if defined(__ANDROID__) || defined(__linux__)
+    if (cpumask.size() > CPU_SETSIZE) {
+        LOGw("%s: mask bigger than CPU_SETSIZE, skipping pin", __func__);
+        return;
+    }
+    cpu_set_t sel;
+    CPU_ZERO(&sel);
+    int count = 0;
+    for (int i = 0; i < (int) cpumask.size(); i++) {
+        if (cpumask[i]) {
+            CPU_SET(i, &sel);
+            count++;
+        }
+    }
+    if (count == 0) {
+        LOGw("%s: empty big-core mask, skipping pin", __func__);
+        return;
+    }
+    const int rc = sched_setaffinity(0, sizeof(sel), &sel);
+    LOGi("%s: pinned %d cores (%s), rc=%d", __func__, count,
+         rc == 0 ? "ok" : "fail", rc);
+#endif
+}
+
+static void pin_worker_thread(void) {
+    if (g_cpus_pin.empty()) { return; }
+    pin_big_cores(g_cpus_pin);
+}
+
 static llama_context *init_context(llama_model *model, const int n_ctx = DEFAULT_CONTEXT_SIZE) {
     if (!model) {
         LOGe("%s: model cannot be null", __func__);
         return nullptr;
     }
 
-    // Multi-threading setup
-    const int n_threads = std::max(N_THREADS_MIN, std::min(N_THREADS_MAX,
-                                                     (int) sysconf(_SC_NPROCESSORS_ONLN) -
-                                                     N_THREADS_HEADROOM));
-    LOGi("%s: Using %d threads", __func__, n_threads);
+    // Multi-threading setup: probe cpuinfo_max_freq, drop efficiency cores
+    const int ncpu = (int) sysconf(_SC_NPROCESSORS_ONLN);
+    std::vector<bool> cpumask(std::max(ncpu, 1), false);
+    const int n_threads = std::max(N_THREADS_MIN,
+            select_big_cores(cpu_max_freqs(ncpu), cpumask, N_THREADS_CAP));
+    std::string big_cores;
+    for (int i = 0; i < ncpu; i++) {
+        if (cpumask[i]) {
+            big_cores += (big_cores.empty() ? "" : " ") + std::to_string(i);
+        }
+    }
+    LOGi("%s: threads=%d big-cores=[%s]", __func__, n_threads, big_cores.c_str());
+
+    // pin the calling thread; ctx_params.n_threads drives llama's default
+    // worker pool (created lazily at first compute), which inherits affinity
+    g_cpus_pin = cpumask;
+    pin_big_cores(cpumask);
 
     // Context parameters setup
     llama_context_params ctx_params = llama_context_default_params();
@@ -93,13 +205,29 @@ static llama_context *init_context(llama_model *model, const int n_ctx = DEFAULT
              __func__, trained_context_size, n_ctx);
     }
     ctx_params.n_ctx = n_ctx;
+    if (KV_CACHE_QUANTIZED) {
+        ctx_params.type_k = KV_TYPE_K;
+        ctx_params.type_v = KV_TYPE_V;
+        // Quantized K requires head_dim % ggml_blck_size(K) == 0 (checked in
+        // llama-context); qwen3.5-4B head_dim is 256 and q4_0 blocks are 32,
+        // so it passes; flash-attn is auto-enabled for quantized V.
+        LOGi("%s: TurboQuant-style KV cache: K=%s V=%s (attn rotation auto-enabled)",
+             __func__, ggml_type_name(KV_TYPE_K), ggml_type_name(KV_TYPE_V));
+    }
     ctx_params.n_batch = BATCH_SIZE;
     ctx_params.n_ubatch = BATCH_SIZE;
     ctx_params.n_threads = n_threads;
     ctx_params.n_threads_batch = n_threads;
     auto *context = llama_init_from_model(g_model, ctx_params);
+    if (context == nullptr && KV_CACHE_QUANTIZED) {
+        LOGw("%s: quantized KV cache rejected, falling back to F16 K/V", __func__);
+        ctx_params.type_k = GGML_TYPE_F16;
+        ctx_params.type_v = GGML_TYPE_F16;
+        context = llama_init_from_model(g_model, ctx_params);
+    }
     if (context == nullptr) {
         LOGe("%s: llama_new_context_with_model() returned null)", __func__);
+        return nullptr;
     }
     return context;
 }
@@ -117,6 +245,7 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_prepare(JNIEnv * /*env*/, jobje
     if (!context) { return 1; }
     g_context = context;
     g_batch = llama_batch_init(BATCH_SIZE, 0, 1);
+    g_batch_init = true;
     g_chat_templates = common_chat_templates_init(g_model, "");
     g_sampler = new_sampler(DEFAULT_SAMPLER_TEMP);
     return 0;
@@ -265,7 +394,7 @@ static void reset_long_term_states(const bool clear_kv_cache = true) {
     system_prompt_position = 0;
     current_position = 0;
 
-    if (clear_kv_cache)
+    if (clear_kv_cache && g_context)
         llama_memory_clear(llama_get_memory(g_context), false);
 }
 
@@ -419,6 +548,7 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_processUserPrompt(
         jstring juser_prompt,
         jint n_predict
 ) {
+    pin_worker_thread();
     // Reset short-term states
     reset_short_term_states();
 
@@ -501,6 +631,7 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_generateNextToken(
         JNIEnv *env,
         jobject /*unused*/
 ) {
+    pin_worker_thread();
     // Infinite text generation via context shifting
     if (current_position >= DEFAULT_CONTEXT_SIZE - OVERFLOW_HEADROOM) {
         LOGw("%s: Context full! Shifting...", __func__);
@@ -562,12 +693,24 @@ Java_com_arm_aichat_internal_InferenceEngineImpl_unload(JNIEnv * /*unused*/, job
     reset_long_term_states();
     reset_short_term_states();
 
-    // Free up resources
-    common_sampler_free(g_sampler);
+    // Free up resources (null-safe + idempotent: safe to call twice)
+    if (g_sampler) {
+        common_sampler_free(g_sampler);
+        g_sampler = nullptr;
+    }
     g_chat_templates.reset();
-    llama_batch_free(g_batch);
-    llama_free(g_context);
-    llama_model_free(g_model);
+    if (g_batch_init) {
+        llama_batch_free(g_batch);
+        g_batch_init = false;
+    }
+    if (g_context) {
+        llama_free(g_context);
+        g_context = nullptr;
+    }
+    if (g_model) {
+        llama_model_free(g_model);
+        g_model = nullptr;
+    }
 }
 
 extern "C"

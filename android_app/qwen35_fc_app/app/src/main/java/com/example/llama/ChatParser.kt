@@ -8,6 +8,7 @@ package com.example.llama
  * - remaining text shown as the final answer
  */
 object ChatParser {
+    private const val TCALL = "tool_call"
 
     data class ToolCall(val name: String, val query: String, val raw: String)
 
@@ -34,6 +35,13 @@ object ChatParser {
         Regex("(web_search|google_search|search)\\s*\\((.*)\\)\\s*$", RegexOption.DOT_MATCHES_ALL)
     private val bareCallInlineRegex =
         Regex("(web_search|google_search|search)\\s*\\(\\s*(\\{.*\\})\\s*\\)", RegexOption.DOT_MATCHES_ALL)
+    private val nameKvRegex = Regex("\\b(?:function|name)\\s*=\\s*([A-Za-z_][A-Za-z0-9_]*)")
+    private val queryKvRegex = Regex("\\bquery\\s*[:=]\\s*(.+)$", RegexOption.DOT_MATCHES_ALL)
+    private val queryColonRegex = Regex("\\bquery\\s*:\\s*(.+)$", RegexOption.DOT_MATCHES_ALL)
+    // Catches degenerate opener forms: mangled tags, chat-pipe leaks,
+    // dropped brackets, per-character separated markup.
+    private val mangledCallRegex =
+        Regex("<\\|?\\s*t\\s*o\\s*o\\s*l\\s*\\|?>?", RegexOption.IGNORE_CASE)
     private val toolResponseRegex =
         Regex("<tool_response>.*?(</tool_response>|$)", RegexOption.DOT_MATCHES_ALL)
 
@@ -42,6 +50,13 @@ object ChatParser {
         val hadHeaderEcho = headerEchoRegex.containsMatchIn(text)
         text = headerEchoRegex.replace(text, "")
         if (hadHeaderEcho) text = strayRoleRegex.replace(text, "")
+
+        // The model sometimes mangles the tool_call opener: a chat pipe
+        // leaked from the previous message, or a dropped '>' character.
+        // Normalize both to the canonical form before any regex runs.
+        text = text.replace("<|" + TCALL + "|>", "")
+            .replace("<|" + TCALL, "")
+            .replace("<" + TCALL, "<" + TCALL + ">")
 
         // Tools first: a call may sit inside (or after) a think block.
         var toolCall: ToolCall? = null
@@ -68,7 +83,9 @@ object ChatParser {
             val inner = text.substring(start + "<tool_call>".length, end)
             if (nameJsonRegex.containsMatchIn(inner) ||
                 functionTagRegex.containsMatchIn(inner) ||
-                queryJsonRegex.containsMatchIn(inner)
+                queryJsonRegex.containsMatchIn(inner) ||
+                nameKvRegex.containsMatchIn(inner) ||
+                queryKvRegex.containsMatchIn(inner)
             ) {
                 toolCall = parseToolInner(inner, text.substring(start, end))
             }
@@ -111,10 +128,13 @@ object ChatParser {
     private fun parseToolInner(inner: String, raw: String): ToolCall {
         val name = functionTagRegex.find(inner)?.groupValues?.get(1)?.trim()
             ?: nameJsonRegex.find(inner)?.groupValues?.get(1)?.trim()
+            ?: nameKvRegex.find(inner)?.groupValues?.get(1)?.trim()
             ?: "web_search"
         val query = queryParamRegex.find(inner)?.groupValues?.get(1)?.trim()
             ?: queryJsonRegex.find(inner)?.groupValues?.get(1)
                 ?.replace("\\\"", "\"")?.replace("\\n", " ")?.trim()
+            ?: queryKvRegex.find(inner)?.groupValues?.get(1)?.trim()?.take(300)
+            ?: queryColonRegex.find(inner)?.groupValues?.get(1)?.trim()?.take(300)
             // Fallback: treat the whole inner text as the query.
             ?: inner.trim().trim('{', '}', '(', ')', '"', '\'').trim().take(300)
         return ToolCall(canonicalToolName(name), query, raw)

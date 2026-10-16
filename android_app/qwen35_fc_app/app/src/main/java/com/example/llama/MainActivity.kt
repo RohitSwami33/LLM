@@ -3,6 +3,8 @@ package com.example.llama
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
@@ -71,6 +73,8 @@ class MainActivity : AppCompatActivity() {
         messagesRv = findViewById(R.id.messages)
         messagesRv.layoutManager = LinearLayoutManager(this).apply { stackFromEnd = true }
         messagesRv.adapter = messageAdapter
+        if (messages.isEmpty()) restoreMessages()
+        if (messages.isNotEmpty()) messageAdapter.notifyDataSetChanged()
         userInputEt = findViewById(R.id.user_input)
         userActionFab = findViewById(R.id.fab)
         newChatBtn = findViewById(R.id.new_chat)
@@ -88,11 +92,7 @@ class MainActivity : AppCompatActivity() {
             recreate()
         }
 
-        newChatBtn.setOnClickListener {
-            generationJob?.cancel()
-            messages.clear()
-            messageAdapter.notifyDataSetChanged()
-        }
+        newChatBtn.setOnClickListener { confirmNewChat() }
 
         // Arm AI Chat initialization
         lifecycleScope.launch(Dispatchers.Default) {
@@ -115,6 +115,18 @@ class MainActivity : AppCompatActivity() {
             } else {
                 // Otherwise, prompt user to select a GGUF metadata on the device
                 getContent.launch(arrayOf("*/*"))
+            }
+        }
+
+        // Keyboard send action sends the message like the FAB does.
+        userInputEt.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
+                if (isModelReady) handleUserInput() else {
+                    Toast.makeText(this, "Model is still loading", Toast.LENGTH_SHORT).show()
+                }
+                true
+            } else {
+                false
             }
         }
     }
@@ -204,20 +216,26 @@ class MainActivity : AppCompatActivity() {
                 setStatus("Loading $POST_TRAINED_MODEL_FILENAME…")
             }
             loadModel(POST_TRAINED_MODEL_FILENAME, modelFile)
-            engine.setSystemPrompt(SYSTEM_PROMPT)
+            engine.setSystemPrompt(systemPromptWithRules())
             withContext(Dispatchers.Main) {
                 markModelReady("Qwen3.5 ORPO-v4")
             }
             withContext(Dispatchers.Main) {
-                messages.add(
-                    Message(
-                        id = UUID.randomUUID().toString(),
-                        content = "Hi! I'm running your post-trained Qwen3.5 ORPO-v4 model on-device. " +
-                            "I can think out loud and search the web when needed. Ask me anything!",
-                        isUser = false,
+                // Greet only a blank slate: a restored history already
+                // has messages, and re-adding here is what produced the
+                // stacked duplicate welcome bubbles after every restart.
+                if (messages.isEmpty()) {
+                    messages.add(
+                        Message(
+                            id = UUID.randomUUID().toString(),
+                            content = "Hi! I'm running your post-trained Qwen3.5 ORPO-v4 model on-device. " +
+                                "I can think out loud and search the web when needed. Ask me anything!",
+                            isUser = false,
+                        )
                     )
-                )
-                messageAdapter.notifyItemInserted(messages.size - 1)
+                    persistMessages()
+                    messageAdapter.notifyItemInserted(messages.size - 1)
+                }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to load post-trained model", e)
@@ -240,6 +258,54 @@ class MainActivity : AppCompatActivity() {
             }
             engine.loadModel(modelFile.path)
         }
+
+    /**
+     * Persist the chat so a process restart (crash/update) never wipes it.
+     */
+    private fun persistMessages() {
+        try {
+            val arr = org.json.JSONArray()
+            messages.takeLast(100).forEach { m ->
+                arr.put(
+                    org.json.JSONObject()
+                        .put("id", m.id)
+                        .put("content", m.content)
+                        .put("isUser", m.isUser)
+                        .put("thinking", m.thinking ?: "")
+                        .put("toolLabel", m.toolLabel ?: "")
+                )
+            }
+            File(filesDir, CHAT_HISTORY_FILE).writeText(arr.toString())
+        } catch (e: Exception) {
+            Log.w(TAG, "Chat persist failed", e)
+        }
+    }
+
+    private fun restoreMessages(): Boolean {
+        return try {
+            val f = File(filesDir, CHAT_HISTORY_FILE)
+            if (!f.exists()) return false
+            val arr = org.json.JSONArray(f.readText())
+            messages.clear()
+            for (i in 0 until arr.length()) {
+                val o = arr.getJSONObject(i)
+                messages.add(
+                    Message(
+                        id = o.getString("id"),
+                        content = o.getString("content"),
+                        isUser = o.getBoolean("isUser"),
+                        thinking = o.optString("thinking").takeIf { it.isNotEmpty() },
+                        thinkingExpanded = false,
+                        toolLabel = o.optString("toolLabel").takeIf { it.isNotEmpty() }
+                    )
+                )
+            }
+            messages.isNotEmpty()
+        } catch (e: Exception) {
+            Log.w(TAG, "Chat restore failed", e)
+            false
+        }
+    }
 
     private fun setStatus(text: String) {
         statusTv.text = text
@@ -272,6 +338,57 @@ class MainActivity : AppCompatActivity() {
         userActionFab.isEnabled = true
     }
 
+    /** Reads the hidden rules file shipped in assets (null when absent). */
+    private fun loadRulesAsset(): String? = try {
+        assets.open(RULES_ASSET).bufferedReader().use { it.readText() }
+            .takeIf { it.isNotBlank() }
+    } catch (_: Exception) {
+        null
+    }
+
+    /** System prompt with the rules file appended when it exists. */
+    private fun systemPromptWithRules(): String {
+        val rules = loadRulesAsset() ?: return SYSTEM_PROMPT
+        return "$SYSTEM_PROMPT\n\n$rules"
+    }
+
+    /** True when a "final answer" is really leftover tool-call markup or
+     * degenerate per-character junk; such output must trigger a retry. */
+    private fun junkyAnswer(a: String): Boolean {
+        val t = a.replace(" ", "").replace("\n", "").lowercase()
+        if (t.isEmpty()) return true
+        if ("tool_call" in t || "toolresponse" in t || "function=" in t) return true
+        if ("web_search" in t || "search" in t && "query" in t) return true
+        // per-character degenerate form: mostly separators
+        val printable = t.count { it.isLetterOrDigit() }
+        return printable * 2 < t.length
+    }
+
+    /**
+     * Greeting/thanks/identity/small-talk inputs are not factual claims; the
+     * fact-check fine-tune goes off the rails on them (invents a claim and
+     * searches for it), so they skip the tool loop entirely.
+     */
+    private fun isSmallTalk(msg: String): Boolean {
+        val m = msg.trim().lowercase()
+        // trailing filler words tolerated: "hi there", "hey bot"
+        return m.matches(Regex(
+            "((hi|hello|heya|hiya|yo|sup|greetings|" +
+                "good\\s*(morning|afternoon|evening))" +
+                "(\\s*(there|bot|qwen|assistant|friend|all))*" +
+                "|hey(\\s*(there|bot|qwen|assistant|friend|all))*)" +
+                "(\\s*[!.?])*" +
+                "|(thanks|thank\\s*you|ty)(\\s*(a\\s*lot|so\\s*much|bud|bro|assistant))?(\\s*[!.?])*" +
+                "|(bye|goodbye|good\\s*night|see\\s*(ya|you))(\\s*(now|later|for\\s*now))?(\\s*[!.?])*" +
+                "|(how\\s*(are|r)\\s*(you|u))(\\s*(doing|doing\\s*today|today))?(\\s*[!.?])*" +
+                "|what'?s\\s*up(\\s*(doc|man|bro))?(\\s*[!.?])*" +
+                "|(who|what)\\s*(are|r)\\s*(you|u)(\\s*(exactly|again))?(\\s*[!.?])*" +
+                "|tell\\s*me\\s*about\\s*yours?elf(\\s*[!.?])*" +
+                "|what\\s*can\\s*you\\s*do(\\s*for\\s*me)?(\\s*[!.?])*",
+            RegexOption.IGNORE_CASE
+        ))
+    }
+
     /**
      * Validate and send the user message into [InferenceEngine], handling the
      * model's think + web_search tool loop and rendering a clean chat answer.
@@ -281,14 +398,21 @@ class MainActivity : AppCompatActivity() {
             if (userMsg.isEmpty()) {
                 Toast.makeText(this, "Input message is empty!", Toast.LENGTH_SHORT).show()
             } else {
+                // The keyboard stays up only if the user is still typing.
+                val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+                imm.hideSoftInputFromWindow(userInputEt.windowToken, 0)
+                // The composer stays editable so the user can type the
+                // next message while this turn runs; only sending is
+                // disabled until finishTurn().
                 userInputEt.text = null
-                userInputEt.isEnabled = false
                 userActionFab.isEnabled = false
+                setStatus("● Generating answer…")
 
                 // Update message states
                 messages.add(Message(UUID.randomUUID().toString(), userMsg, true))
                 val assistantId = UUID.randomUUID().toString()
                 messages.add(Message(assistantId, "Thinking…", false))
+                persistMessages()
                 messageAdapter.notifyItemInserted(messages.size - 1)
                 messagesRv.scrollToPosition(messages.size - 1)
 
@@ -319,34 +443,81 @@ class MainActivity : AppCompatActivity() {
     private suspend fun runAssistantTurn(assistantId: String, userMsg: String) {
         var followUp: String? = null
         var toolRounds = 0
+        var webDown = false
         var thinking: String? = null
         var toolLabel: String? = null
         var lastWebResults: String? = null
 
         // First generation: the user's message.
+        val smallTalk = isSmallTalk(userMsg)
         var raw = collectGeneration(userMsg, predictLength = 1024)
         Log.i(TAG, "First raw (first 1500 chars): ${raw.take(1500)}")
         var parsed = ChatParser.parse(raw)
         thinking = parsed.thinking ?: thinking
 
         // Tool loop: resolve web_search calls, then ask for the final answer.
-        while (parsed.toolCall != null && toolRounds < MAX_TOOL_ROUNDS) {
+        while (!smallTalk && parsed.toolCall != null && toolRounds < MAX_TOOL_ROUNDS) {
             val tool = parsed.toolCall!!
             if (tool.name != "web_search" || tool.query.isBlank()) break
+            // The model's rewritten queries proved unreliable on-device
+            // (garbled/echo/drift); the user's own message IS the query.
+            val query = userMsg.trim().trimEnd('.', '?', '!')
             toolRounds++
-            toolLabel = "Web search used for: \"${tool.query.take(120)}\""
+            toolLabel = "Web search used for: \"${query.take(120)}\""
             withContext(Dispatchers.Main) {
                 updateAssistant(assistantId, "Thinking…", thinking, toolLabel)
             }
-            Log.i(TAG, "Executing web_search: ${tool.query}")
-            val result = WebSearch.search(tool.query)
+            Log.i(TAG, "Executing web_search: $query")
+            val result = WebSearch.search(query)
             lastWebResults = result
-            followUp = "<tool_response>\n$result\n</tool_response>\n" +
-                "The tool result is above. Your reply must contain ONLY the " +
-                "bare final answer. Never announce, narrate, or explain what " +
-                "you are about to do, and never emit another tool_call."
+            // Detect tool outage: WebSearch returns failure strings
+            // instead of throwing; tell the model so it can fall back.
+            webDown = result.startsWith("Web search failed") ||
+                result.startsWith("No web results found")
+            followUp = if (webDown) {
+                " \n$result\n \n" +
+                    "The web search tool isn't available right now. If " +
+                    "you know the answer from your own knowledge, answer " +
+                    "in 2-4 plain sentences. If you do not know it, reply " +
+                    "with exactly this sentence and nothing else: " +
+                    "I don't know the answer, and the web search tool " +
+                    "isn't available right now."
+            } else {
+                " \n$result\n \n" +
+                    "Answer the user's ORIGINAL message using this result. If " +
+                    "it was a question, start with the direct answer and give " +
+                    "2-4 plain sentences (entity first, then relevant " +
+                    "details). If it was a claim, open with exactly one " +
+                    "verdict sentence plus the evidence. Never narrate, " +
+                    "never emit another tool_call."
+            }
             raw = collectGeneration(followUp, predictLength = 1024)
             Log.i(TAG, "Follow-up raw (first 1500 chars): ${raw.take(1500)}")
+            parsed = ChatParser.parse(raw)
+            if (parsed.thinking != null) thinking = parsed.thinking
+        }
+
+        // Unusable answer (blank, malformed markup, or another tool call
+        // after the round cap): ask once more for a direct reply. The
+        // fetched web result travels along so the model can answer
+        // without calling the tool again.
+        if ((parsed.answer.isBlank() || junkyAnswer(parsed.answer)) && !smallTalk) {
+            Log.i(TAG, "Unusable answer; retrying with no-tools instruction")
+            raw = collectGeneration(
+                buildString {
+                    append(" (no tools are available right now). Reply directly ")
+                    append("in 2-4 plain sentences using your own knowledge")
+                    lastWebResults?.let {
+                        append(". Web result to use instead of any tool call:\n")
+                        append(it)
+                    }
+                    append(". Do not emit any tool_call. If you do not know ")
+                    append("the answer, reply exactly: I don't know the answer, ")
+                    append("and the web search tool isn't available right now.")
+                },
+                predictLength = 1024,
+            )
+            Log.i(TAG, "Retry raw (first 1500 chars): ${raw.take(1500)}")
             parsed = ChatParser.parse(raw)
             if (parsed.thinking != null) thinking = parsed.thinking
         }
@@ -354,8 +525,12 @@ class MainActivity : AppCompatActivity() {
         val answer = parsed.answer.ifBlank {
             // The model never produced a final answer (kept emitting tool
             // calls): present the fetched web results directly instead.
-            lastWebResults?.let { "Here's what I found on the web:\n\n$it" }
-                ?: "I couldn't compose an answer. Try asking again."
+            when {
+                smallTalk -> "Hello! I'm Qwen, your on-device assistant. How can I help?"
+                webDown -> "I don't know the answer, and the web search tool isn't available right now."
+                lastWebResults != null -> "Here's what I found on the web:\n\n$lastWebResults"
+                else -> "I couldn't compose an answer. Try asking again."
+            }
         }
         withContext(Dispatchers.Main) {
             updateAssistant(assistantId, answer, thinking, toolLabel)
@@ -388,11 +563,28 @@ class MainActivity : AppCompatActivity() {
         )
         messageAdapter.notifyItemChanged(index)
         messagesRv.scrollToPosition(index)
+        persistMessages()
+    }
+
+    private fun confirmNewChat() {
+        if (messages.isEmpty()) return
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("New chat")
+            .setMessage("Clear the current conversation?")
+            .setPositiveButton("Clear") { _, _ ->
+                generationJob?.cancel()
+                messages.clear()
+                persistMessages()
+                messageAdapter.notifyDataSetChanged()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     private fun finishTurn() {
         userInputEt.isEnabled = true
         userActionFab.isEnabled = true
+        setStatus("● Qwen3.5 ORPO-v4 ready")
     }
 
     /**
@@ -433,7 +625,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        engine.destroy()
+        // Only tear down the native engine when the user is really leaving;
+        // config changes (rotation/theme) must keep the loaded model alive.
+        if (isFinishing && this::engine.isInitialized) {
+            try {
+                engine.destroy()
+            } catch (e: Exception) {
+                Log.w(TAG, "Engine destroy failed", e)
+            }
+        }
         super.onDestroy()
     }
 
@@ -447,23 +647,21 @@ class MainActivity : AppCompatActivity() {
         private val retainedMessages = mutableListOf<Message>()
 
         private const val DIRECTORY_MODELS = "models"
+        private const val RULES_ASSET = "rules.txt"
+        private const val CHAT_HISTORY_FILE = "chat_history.json"
         private const val FILE_EXTENSION_GGUF = ".gguf"
-        private const val POST_TRAINED_MODEL_FILENAME = "qwen35_orpo_v4_posttrained_q4_k_m.gguf"
+        private const val POST_TRAINED_MODEL_FILENAME = "qwen35_orpo_v4_posttrained_q4_0_kai.gguf"
         private const val MAX_TOOL_ROUNDS = 2
 
         private const val SYSTEM_PROMPT =
             "You are Qwen, a helpful on-device assistant. " +
-                "Begin EVERY response with a <think>...</think> block holding " +
-                "your step-by-step reasoning. Then decide: if you need current " +
-                "or external facts, emit exactly one <tool_call> for web_search " +
-                "with a short SELF-CONTAINED query (include all needed context, " +
-                "never copy earlier questions), then wait for the tool result. " +
-                "After receiving <tool_response>, reply with ONLY the final " +
-                "answer in plain sentences: no tool_call markup, no 'Final " +
-                "Answer:' prefix. If no search is needed, give the final answer " +
-                "right after the think block."
+                "Begin EVERY response with a <tool_call> for web_search per " +
+                "reply, and only when the answer needs current or external " +
+                "facts. Never emit tool_call markup in your final answer. " +
+                "If no search is needed, give the final answer right after " +
+                "the think block."
 
-        private const val BENCH_PROMPT_PROCESSING_TOKENS = 512
+private const val BENCH_PROMPT_PROCESSING_TOKENS = 512
         private const val BENCH_TOKEN_GENERATION_TOKENS = 128
         private const val BENCH_SEQUENCE = 1
         private const val BENCH_REPETITION = 3

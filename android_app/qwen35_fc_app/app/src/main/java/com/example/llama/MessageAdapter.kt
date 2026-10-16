@@ -45,9 +45,11 @@ class MessageAdapter(
         val message = messages[position]
         if (holder is UserMessageViewHolder) {
             holder.itemView.findViewById<TextView>(R.id.msg_content).text = message.content
+            enableCopy(holder.itemView.findViewById(R.id.msg_content), message.content)
         } else if (holder is AssistantMessageViewHolder) {
             val content = holder.itemView.findViewById<TextView>(R.id.msg_content)
             content.text = message.content.ifEmpty { "…" }
+            enableCopy(content, message.content)
 
             val thinkingCard =
                 holder.itemView.findViewById<LinearLayout>(R.id.thinking_card)
@@ -55,15 +57,17 @@ class MessageAdapter(
                 holder.itemView.findViewById<TextView>(R.id.thinking_header)
             val thinkingBody =
                 holder.itemView.findViewById<TextView>(R.id.thinking_body)
-            if (!message.thinking.isNullOrBlank()) {
+            // Reasoning matters only on tool turns (it explains the search
+            // loop); plain answers keep the chat clean without the card.
+            if (!message.thinking.isNullOrBlank() && !message.toolLabel.isNullOrBlank()) {
                 thinkingCard.visibility = View.VISIBLE
                 thinkingBody.text = message.thinking
                 if (message.thinkingExpanded) {
                     thinkingBody.maxLines = Int.MAX_VALUE
-                    thinkingHeader.text = "Thought (tap to collapse)"
+                    thinkingHeader.text = "Reasoning (tap to hide)"
                 } else {
-                    thinkingBody.maxLines = 3
-                    thinkingHeader.text = "Thought (tap to expand)"
+                    thinkingBody.maxLines = 1
+                    thinkingHeader.text = "Reasoning (tap to expand)"
                 }
                 thinkingCard.setOnClickListener { onThinkingToggle(message.id) }
             } else {
@@ -79,6 +83,21 @@ class MessageAdapter(
             } else {
                 toolCard.visibility = View.GONE
             }
+        }
+    }
+
+    /** Long-press copies the raw text (no tool markup is ever copied). */
+    private fun enableCopy(view: View, raw: String) {
+        view.setOnLongClickListener {
+            val clip = android.content.ClipData.newPlainText("message", raw)
+            val cm = view.context.getSystemService(
+                android.content.Context.CLIPBOARD_SERVICE,
+            ) as android.content.ClipboardManager
+            cm.setPrimaryClip(clip)
+            android.widget.Toast
+                .makeText(view.context, "Copied", android.widget.Toast.LENGTH_SHORT)
+                .show()
+            true
         }
     }
 

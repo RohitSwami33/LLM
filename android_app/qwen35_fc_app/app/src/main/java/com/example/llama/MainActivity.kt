@@ -103,6 +103,16 @@ class MainActivity : AppCompatActivity() {
                 // Activity recreated (e.g. theme change): model still loaded.
                 withContext(Dispatchers.Main) { markModelReady("Qwen3.5 ORPO-v4") }
             } else {
+                try {
+                    ensureBundledModelExtracted()
+                } catch (e: Exception) {
+                    // Extraction failure keeps the app usable: the manual
+                    // GGUF picker path still exists.
+                    Log.e(TAG, "Bundled model extraction failed", e)
+                    withContext(Dispatchers.Main) {
+                        setStatus("● Bundled model failed, use picker or reinstall")
+                    }
+                }
                 autoLoadPostTrainedModel()
             }
         }
@@ -258,6 +268,67 @@ class MainActivity : AppCompatActivity() {
             }
             engine.loadModel(modelFile.path)
         }
+
+    /**
+     * Copies the GGUF bundled in the APK into app-private storage on the
+     * very first launch, so a plain phone install needs no adb staging.
+     */
+    private suspend fun ensureBundledModelExtracted() {
+        val outDir = ensureModelsDirectory()
+        val out = File(outDir, POST_TRAINED_MODEL_FILENAME)
+        if (out.exists() && out.length() > 0) {
+            return  // Already staged (or extracted); temp+rename guaranteed completeness.
+        }
+        if (!outDir.exists()) outDir.mkdirs()
+        val tmp = File(outDir, POST_TRAINED_MODEL_FILENAME + ".part")
+        tmp.delete()
+        val setStatusText: suspend (String) -> Unit = { t: String ->
+            withContext(Dispatchers.Main) { setStatus(t) }
+        }
+        setStatusText("● Extracting model (first launch)…")
+        Log.i(TAG, "Extracting bundled model to ${out.path}")
+        try {
+            assets.openFd("gguf/$POST_TRAINED_MODEL_FILENAME").use { afd ->
+                afd.createInputStream().use { input ->
+                    tmp.outputStream().use { fos ->
+                        val total = afd.length
+                        val buf = ByteArray(1 shl 22) // 4 MiB
+                        var copied = 0L
+                        var nextReport = 512L shl 20
+                        while (copied < total) {
+                            // AssetInputStream can return alignment padding
+                            // past afd.length; clamp every read to remaining
+                            // so the clone ends at exactly the asset bytes.
+                            val want = minOf(buf.size.toLong(), total - copied).toInt()
+                            val n = input.read(buf, 0, want)
+                            if (n <= 0) break
+                            fos.write(buf, 0, n)
+                            copied += n
+                            if (copied >= nextReport) {
+                                nextReport += 512L shl 20
+                                setStatusText(
+                                    "● Extracting model ${copied * 100 / maxOf(total, 1)}%…",
+                                )
+                            }
+                        }
+                        fos.flush()
+                        if (copied < total) {
+                            throw IllegalStateException(
+                                "Extraction incomplete: $copied / $total bytes",
+                            )
+                        }
+                    }
+                }
+            }
+            if (!tmp.renameTo(out)) {
+                throw IllegalStateException("Could not finalize model extraction")
+            }
+            Log.i(TAG, "Bundled model extracted: ${out.length()} bytes")
+            setStatusText("● Model ready to load…")
+        } finally {
+            tmp.delete()
+        }
+    }
 
     /**
      * Persist the chat so a process restart (crash/update) never wipes it.

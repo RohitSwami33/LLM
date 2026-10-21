@@ -44,6 +44,11 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    androidResources {
+        // The bundled GGUF stays uncompressed in the APK so the
+        // first-launch extractor can stream it out byte-faithful.
+        noCompress += "gguf"
+    }
 }
 
 dependencies {
